@@ -9,6 +9,7 @@ import { fetchDashboardData, DashboardData } from "@/lib/api";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -44,27 +45,32 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors">
         {/* Header */}
-        <div className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+        <div className="border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-white">
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white transition-colors">
                   Ventura Capital
                 </h1>
-                <p className="text-slate-400 mt-1">Investment Dashboard</p>
+                <p className="text-slate-600 dark:text-slate-400 mt-1 transition-colors">
+                  Investment Dashboard
+                </p>
               </div>
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4">
                 <div className="text-right">
-                  <p className="text-sm text-slate-400">Logged in as</p>
-                  <p className="text-sm font-semibold text-slate-200">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 transition-colors">
+                    Logged in as
+                  </p>
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 transition-colors">
                     {user?.email}
                   </p>
                 </div>
+                <ThemeToggle />
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors text-sm font-medium"
+                  className="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors text-sm font-medium"
                 >
                   Logout
                 </button>
@@ -77,14 +83,18 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {loading && (
             <div className="flex items-center justify-center h-64">
-              <div className="text-slate-400 text-lg">Loading dashboard...</div>
+              <div className="text-slate-600 dark:text-slate-400 text-lg transition-colors">
+                Loading dashboard...
+              </div>
             </div>
           )}
 
           {error && (
-            <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 mb-6">
-              <p className="text-red-400">⚠️ {error}</p>
-              <p className="text-sm text-slate-400 mt-2">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 transition-colors">
+              <p className="text-red-700 dark:text-red-400 transition-colors">
+                ⚠️ {error}
+              </p>
+              <p className="text-sm text-red-600 dark:text-slate-400 mt-2 transition-colors">
                 Make sure the backend is running on http://localhost:8080
               </p>
             </div>

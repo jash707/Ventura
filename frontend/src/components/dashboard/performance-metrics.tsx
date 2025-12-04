@@ -10,10 +10,46 @@ import {
   YAxis,
 } from "recharts";
 import { PerformanceMetrics } from "@/lib/types";
+import { useTheme } from "next-themes";
 
 interface PerformanceMetricsProps {
   metrics: PerformanceMetrics;
 }
+
+// Custom Tooltip Component
+const CustomTooltip = ({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ value: number }>;
+}) => {
+  const { theme, systemTheme } = useTheme();
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const isDark = currentTheme === "dark";
+
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className={`rounded-lg p-3 shadow-lg border ${
+          isDark
+            ? "bg-slate-800 border-slate-700 text-slate-200"
+            : "bg-white border-slate-200 text-slate-900"
+        }`}
+      >
+        <p className="text-sm">Portfolio Value</p>
+        <p
+          className={`font-bold ${
+            isDark ? "text-emerald-400" : "text-emerald-600"
+          }`}
+        >
+          ${payload[0].value}M
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const mockTimeSeriesData = [
   { month: "Jan", value: 18 },
@@ -29,27 +65,31 @@ const mockTimeSeriesData = [
 
 export function PerformanceMetricsCard({ metrics }: PerformanceMetricsProps) {
   return (
-    <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700">
-      <h3 className="text-lg font-semibold text-slate-200 mb-6">
+    <Card className="p-6 bg-card border-border">
+      <h3 className="text-lg font-semibold text-card-foreground mb-6">
         Performance Metrics
       </h3>
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
-          <p className="text-xs text-slate-400 mb-1">Internal Rate of Return</p>
-          <p className="text-2xl font-bold text-emerald-400">
+          <p className="text-xs text-muted-foreground mb-1">
+            Internal Rate of Return
+          </p>
+          <p className="text-2xl font-bold text-emerald-500 dark:text-emerald-400">
             {metrics.irr.toFixed(1)}%
           </p>
-          <p className="text-xs text-slate-500 mt-1">Annualized</p>
+          <p className="text-xs text-muted-foreground mt-1">Annualized</p>
         </div>
         <div>
-          <p className="text-xs text-slate-400 mb-1">
+          <p className="text-xs text-muted-foreground mb-1">
             Multiple on Invested Capital
           </p>
-          <p className="text-2xl font-bold text-violet-400">
+          <p className="text-2xl font-bold text-violet-500 dark:text-violet-400">
             {metrics.moic.toFixed(2)}x
           </p>
-          <p className="text-xs text-slate-500 mt-1">Total Return Multiple</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Total Return Multiple
+          </p>
         </div>
       </div>
 
@@ -74,15 +114,7 @@ export function PerformanceMetricsCard({ metrics }: PerformanceMetricsProps) {
               tickLine={false}
               tickFormatter={(value) => `${value}M`}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#1e293b",
-                border: "1px solid #334155",
-                borderRadius: "8px",
-                color: "#e2e8f0",
-              }}
-              formatter={(value: number) => [`$${value}M`, "Portfolio Value"]}
-            />
+            <Tooltip content={<CustomTooltip />} />
             <Area
               type="monotone"
               dataKey="value"
