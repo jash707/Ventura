@@ -28,7 +28,17 @@ export interface DashboardData {
 }
 
 export async function fetchDashboardData(): Promise<DashboardData> {
-  const response = await fetch(`${API_BASE_URL}/api/dashboard`);
+  const response = await fetch(`${API_BASE_URL}/api/dashboard`, {
+    credentials: "include", // Include cookies for authentication
+  });
+
+  if (response.status === 401) {
+    // Redirect to login if unauthorized
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
 
   if (!response.ok) {
     throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);

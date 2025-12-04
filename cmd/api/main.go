@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"ventura/internal/handler"
+	"ventura/internal/middleware"
 	"ventura/internal/models"
 	"ventura/internal/repository"
 	"ventura/internal/service"
@@ -24,6 +25,7 @@ func main() {
 
 	// Auto Migrate all models
 	db.AutoMigrate(
+		&models.User{},
 		&models.Investment{},
 		&models.Metrics{},
 		&models.PortfolioCompany{},
@@ -34,6 +36,7 @@ func main() {
 	)
 
 	// Repositories
+	userRepo := repository.NewUserRepository(db)
 	investmentRepo := repository.NewInvestmentRepository(db)
 	portfolioRepo := repository.NewPortfolioRepository(db)
 	dealRepo := repository.NewDealRepository(db)
@@ -43,6 +46,7 @@ func main() {
 	analyticsService := service.NewAnalyticsService()
 
 	// Handlers
+	authHandler := handler.NewAuthHandler(userRepo)
 	investmentHandler := handler.NewInvestmentHandler(investmentService)
 	dashboardHandler := handler.NewDashboardHandler(portfolioRepo, analyticsService)
 	dealHandler := handler.NewDealHandler(dealRepo)
@@ -63,14 +67,25 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// Health Check
+	// Health Check (public)
 	r.GET("/health", handler.HealthCheck)
 
-	// Legacy Investment Routes
+	// Auth Routes (public)
+	auth := r.Group("/auth")
+	{
+		auth.POST("/register", authHandler.Register)
+		auth.POST("/login", authHandler.Login)
+		auth.POST("/refresh", authHandler.Refresh)
+		auth.POST("/logout", authHandler.Logout)
+		auth.GET("/me", middleware.AuthMiddleware(), authHandler.Me)
+	}
+
+	// Legacy Investment Routes (public for now)
 	r.POST("/investments", investmentHandler.CreateInvestment)
 
-	// API Routes
+	// Protected API Routes
 	api := r.Group("/api")
+	api.Use(middleware.AuthMiddleware()) // Require authentication for all /api routes
 	{
 		// Dashboard Routes
 		dashboard := api.Group("/dashboard")

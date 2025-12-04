@@ -6,11 +6,16 @@ import { PerformanceMetricsCard } from "@/components/dashboard/performance-metri
 import { SectorAllocationCard } from "@/components/dashboard/sector-allocation";
 import { PortfolioHealthCard } from "@/components/dashboard/portfolio-health";
 import { fetchDashboardData, DashboardData } from "@/lib/api";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     async function loadDashboard() {
@@ -32,95 +37,108 @@ export default function DashboardPage() {
     loadDashboard();
   }, []);
 
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Header */}
-      <div className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white">Ventura Capital</h1>
-              <p className="text-slate-400 mt-1">Investment Dashboard</p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-slate-400">Last updated</p>
-              <p className="text-sm font-semibold text-slate-200">
-                {new Date().toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </p>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        {/* Header */}
+        <div className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-white">
+                  Ventura Capital
+                </h1>
+                <p className="text-slate-400 mt-1">Investment Dashboard</p>
+              </div>
+              <div className="flex items-center gap-6">
+                <div className="text-right">
+                  <p className="text-sm text-slate-400">Logged in as</p>
+                  <p className="text-sm font-semibold text-slate-200">
+                    {user?.email}
+                  </p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors text-sm font-medium"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {loading && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-slate-400 text-lg">Loading dashboard...</div>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 mb-6">
+              <p className="text-red-400">⚠️ {error}</p>
+              <p className="text-sm text-slate-400 mt-2">
+                Make sure the backend is running on http://localhost:8080
+              </p>
+            </div>
+          )}
+
+          {data && !loading && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* AUM Card - Spans 1 column */}
+              <div className="lg:col-span-1">
+                <AUMCard
+                  totalDeployed={parseFloat(data.aum.totalDeployed)}
+                  currentValuation={parseFloat(data.aum.currentValuation)}
+                  unrealizedGains={parseFloat(data.aum.unrealizedGains)}
+                />
+              </div>
+
+              {/* Performance Metrics - Spans 2 columns */}
+              <div className="lg:col-span-2">
+                <PerformanceMetricsCard
+                  metrics={{
+                    irr: data.performance.irr,
+                    moic: parseFloat(data.performance.moic),
+                    totalDeployed: parseFloat(data.performance.totalDeployed),
+                    currentValue: parseFloat(data.performance.currentValue),
+                    distributions: data.performance.distributions,
+                  }}
+                />
+              </div>
+
+              {/* Sector Allocation - Spans 1 column */}
+              <div className="lg:col-span-1">
+                <SectorAllocationCard
+                  sectors={data.sectorAllocation.map((s) => ({
+                    sector: s.sector,
+                    value: parseFloat(s.value),
+                    percentage: s.percentage,
+                    color: getColorForSector(s.sector),
+                  }))}
+                />
+              </div>
+
+              {/* Portfolio Health - Spans 2 columns */}
+              <div className="lg:col-span-2">
+                <PortfolioHealthCard
+                  green={data.portfolioHealth.green}
+                  yellow={data.portfolioHealth.yellow}
+                  red={data.portfolioHealth.red}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {loading && (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-slate-400 text-lg">Loading dashboard...</div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 mb-6">
-            <p className="text-red-400">⚠️ {error}</p>
-            <p className="text-sm text-slate-400 mt-2">
-              Make sure the backend is running on http://localhost:8080
-            </p>
-          </div>
-        )}
-
-        {data && !loading && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* AUM Card - Spans 1 column */}
-            <div className="lg:col-span-1">
-              <AUMCard
-                totalDeployed={parseFloat(data.aum.totalDeployed)}
-                currentValuation={parseFloat(data.aum.currentValuation)}
-                unrealizedGains={parseFloat(data.aum.unrealizedGains)}
-              />
-            </div>
-
-            {/* Performance Metrics - Spans 2 columns */}
-            <div className="lg:col-span-2">
-              <PerformanceMetricsCard
-                metrics={{
-                  irr: data.performance.irr,
-                  moic: parseFloat(data.performance.moic),
-                  totalDeployed: parseFloat(data.performance.totalDeployed),
-                  currentValue: parseFloat(data.performance.currentValue),
-                  distributions: data.performance.distributions,
-                }}
-              />
-            </div>
-
-            {/* Sector Allocation - Spans 1 column */}
-            <div className="lg:col-span-1">
-              <SectorAllocationCard
-                sectors={data.sectorAllocation.map((s) => ({
-                  sector: s.sector,
-                  value: parseFloat(s.value),
-                  percentage: s.percentage,
-                  color: getColorForSector(s.sector),
-                }))}
-              />
-            </div>
-
-            {/* Portfolio Health - Spans 2 columns */}
-            <div className="lg:col-span-2">
-              <PortfolioHealthCard
-                green={data.portfolioHealth.green}
-                yellow={data.portfolioHealth.yellow}
-                red={data.portfolioHealth.red}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+    </ProtectedRoute>
   );
 }
 

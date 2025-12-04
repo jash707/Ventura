@@ -49,3 +49,14 @@ export interface DashboardData {
     red: PortfolioCompany[];
   };
 }
+
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  role: "admin" | "viewer";
+}
+
+export interface AuthResponse {
+  user: User;
+}

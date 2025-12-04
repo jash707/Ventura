@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 	"ventura/internal/models"
+	"ventura/internal/repository"
 
 	"github.com/shopspring/decimal"
 	"gorm.io/driver/postgres"
@@ -18,6 +19,30 @@ func main() {
 	}
 
 	log.Println("Starting database seeding...")
+
+	// Create admin user
+	userRepo := repository.NewUserRepository(db)
+	adminUser := &models.User{
+		Email:    "admin@ventura.com",
+		Password: "admin123", // Will be hashed by BeforeCreate hook
+		Name:     "Admin User",
+		Role:     models.RoleAdmin,
+	}
+
+	// Check if admin user already exists
+	existingUser, _ := userRepo.FindByEmail(adminUser.Email)
+	if existingUser != nil {
+		log.Println("✓ Admin user already exists")
+	} else {
+		if err := userRepo.Create(adminUser); err != nil {
+			log.Fatal("Failed to create admin user:", err)
+		}
+		log.Println("✅ Admin user created successfully!")
+		log.Println("   Email: admin@ventura.com")
+		log.Println("   Password: admin123")
+	}
+
+	log.Println("\nSeeding portfolio companies...")
 
 	// Sample portfolio companies matching frontend mock data
 	companies := []models.PortfolioCompany{
