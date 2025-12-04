@@ -56,9 +56,9 @@ export function SectorAllocationCard({ sectors }: SectorAllocationProps) {
         </div>
 
         <div className="flex-1 space-y-3">
-          {sectors.map((sector) => (
+          {sectors.map((sector, index) => (
             <div
-              key={sector.sector}
+              key={`${sector.sector}-${index}`}
               className="flex items-center justify-between"
             >
               <div className="flex items-center gap-2">
@@ -70,7 +70,7 @@ export function SectorAllocationCard({ sectors }: SectorAllocationProps) {
               </div>
               <div className="text-right">
                 <p className="text-sm font-semibold text-slate-200">
-                  {sector.percentage.toFixed(1)}%
+                  {(sector.percentage ?? 0).toFixed(1)}%
                 </p>
                 <p className="text-xs text-slate-500">
                   {formatCurrency(sector.value)}

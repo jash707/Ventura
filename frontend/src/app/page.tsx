@@ -1,14 +1,36 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AUMCard } from "@/components/dashboard/aum-card";
 import { PerformanceMetricsCard } from "@/components/dashboard/performance-metrics";
 import { SectorAllocationCard } from "@/components/dashboard/sector-allocation";
 import { PortfolioHealthCard } from "@/components/dashboard/portfolio-health";
-import { mockDashboardData } from "@/lib/mock-data";
+import { fetchDashboardData, DashboardData } from "@/lib/api";
 
 export default function DashboardPage() {
-  const { aum, performance, sectorAllocation, portfolioHealth } =
-    mockDashboardData;
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadDashboard() {
+      try {
+        setLoading(true);
+        const dashboardData = await fetchDashboardData();
+        setData(dashboardData);
+        setError(null);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load dashboard"
+        );
+        console.error("Dashboard error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboard();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -36,36 +58,79 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* AUM Card - Spans 1 column */}
-          <div className="lg:col-span-1">
-            <AUMCard
-              totalDeployed={aum.totalDeployed}
-              currentValuation={aum.currentValuation}
-              unrealizedGains={aum.unrealizedGains}
-            />
+        {loading && (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-slate-400 text-lg">Loading dashboard...</div>
           </div>
+        )}
 
-          {/* Performance Metrics - Spans 2 columns */}
-          <div className="lg:col-span-2">
-            <PerformanceMetricsCard metrics={performance} />
+        {error && (
+          <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 mb-6">
+            <p className="text-red-400">⚠️ {error}</p>
+            <p className="text-sm text-slate-400 mt-2">
+              Make sure the backend is running on http://localhost:8080
+            </p>
           </div>
+        )}
 
-          {/* Sector Allocation - Spans 1 column */}
-          <div className="lg:col-span-1">
-            <SectorAllocationCard sectors={sectorAllocation} />
-          </div>
+        {data && !loading && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* AUM Card - Spans 1 column */}
+            <div className="lg:col-span-1">
+              <AUMCard
+                totalDeployed={parseFloat(data.aum.totalDeployed)}
+                currentValuation={parseFloat(data.aum.currentValuation)}
+                unrealizedGains={parseFloat(data.aum.unrealizedGains)}
+              />
+            </div>
 
-          {/* Portfolio Health - Spans 2 columns */}
-          <div className="lg:col-span-2">
-            <PortfolioHealthCard
-              green={portfolioHealth.green}
-              yellow={portfolioHealth.yellow}
-              red={portfolioHealth.red}
-            />
+            {/* Performance Metrics - Spans 2 columns */}
+            <div className="lg:col-span-2">
+              <PerformanceMetricsCard
+                metrics={{
+                  irr: data.performance.irr,
+                  moic: parseFloat(data.performance.moic),
+                  totalDeployed: parseFloat(data.performance.totalDeployed),
+                  currentValue: parseFloat(data.performance.currentValue),
+                  distributions: data.performance.distributions,
+                }}
+              />
+            </div>
+
+            {/* Sector Allocation - Spans 1 column */}
+            <div className="lg:col-span-1">
+              <SectorAllocationCard
+                sectors={data.sectorAllocation.map((s) => ({
+                  sector: s.sector,
+                  value: parseFloat(s.value),
+                  percentage: s.percentage,
+                  color: getColorForSector(s.sector),
+                }))}
+              />
+            </div>
+
+            {/* Portfolio Health - Spans 2 columns */}
+            <div className="lg:col-span-2">
+              <PortfolioHealthCard
+                green={data.portfolioHealth.green}
+                yellow={data.portfolioHealth.yellow}
+                red={data.portfolioHealth.red}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
+}
+
+// Helper to assign colors to sectors
+function getColorForSector(sector: string): string {
+  const colors: Record<string, string> = {
+    SaaS: "#3b82f6",
+    Fintech: "#8b5cf6",
+    AI: "#ec4899",
+    BioTech: "#10b981",
+  };
+  return colors[sector] || "#64748b";
 }
