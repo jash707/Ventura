@@ -65,6 +65,12 @@ export default function DashboardPage() {
                 >
                   View Portfolio
                 </button>
+                <button
+                  onClick={() => router.push("/deals")}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium shadow-lg shadow-purple-500/20"
+                >
+                  View Deals
+                </button>
                 <div className="text-right">
                   <p className="text-sm text-slate-600 dark:text-slate-400 transition-colors">
                     Logged in as

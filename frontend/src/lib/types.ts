@@ -60,3 +60,31 @@ export interface User {
 export interface AuthResponse {
   user: User;
 }
+
+export type DealStage =
+  | "incoming"
+  | "screening"
+  | "due_diligence"
+  | "term_sheet"
+  | "closed"
+  | "lost";
+
+export interface Deal {
+  id: number;
+  companyName: string;
+  sector: string;
+  stage: DealStage;
+  requestedAmount: string;
+  valuation: string;
+  roundStage: string; // "Seed", "Series A", etc.
+  teamScore: number; // 1-10
+  productScore: number; // 1-10
+  marketScore: number; // 1-10
+  tractionScore: number; // 1-10
+  totalScore: number; // Calculated sum
+  founderName: string;
+  founderEmail: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}

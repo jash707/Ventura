@@ -1,4 +1,4 @@
-import { PortfolioCompany } from "./types";
+import { PortfolioCompany, Deal, DealStage } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -92,4 +92,93 @@ export async function fetchCompanyById(id: string): Promise<PortfolioCompany> {
   }
 
   return response.json();
+}
+
+// Backend response type (PascalCase from Go)
+interface BackendDeal {
+  ID: number;
+  CompanyName: string;
+  Sector: string;
+  Stage: DealStage;
+  RequestedAmount: string;
+  Valuation: string;
+  RoundStage: string;
+  TeamScore: number;
+  ProductScore: number;
+  MarketScore: number;
+  TractionScore: number;
+  TotalScore: number;
+  FounderName: string;
+  FounderEmail: string;
+  Notes: string;
+  CreatedAt: string;
+  UpdatedAt: string;
+}
+
+// Helper function to transform backend PascalCase to frontend camelCase
+function transformDeal(backendDeal: BackendDeal): Deal {
+  return {
+    id: backendDeal.ID,
+    companyName: backendDeal.CompanyName,
+    sector: backendDeal.Sector,
+    stage: backendDeal.Stage,
+    requestedAmount: backendDeal.RequestedAmount,
+    valuation: backendDeal.Valuation,
+    roundStage: backendDeal.RoundStage,
+    teamScore: backendDeal.TeamScore,
+    productScore: backendDeal.ProductScore,
+    marketScore: backendDeal.MarketScore,
+    tractionScore: backendDeal.TractionScore,
+    totalScore: backendDeal.TotalScore,
+    founderName: backendDeal.FounderName,
+    founderEmail: backendDeal.FounderEmail,
+    notes: backendDeal.Notes,
+    createdAt: backendDeal.CreatedAt,
+    updatedAt: backendDeal.UpdatedAt,
+  };
+}
+
+export async function fetchDeals(): Promise<Deal[]> {
+  const response = await fetch(`${API_BASE_URL}/api/deals`, {
+    credentials: "include",
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch deals: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.map(transformDeal);
+}
+
+export async function updateDealStage(
+  id: number,
+  stage: DealStage
+): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/deals/${id}/stage`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ stage }),
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to update deal stage: ${response.statusText}`);
+  }
 }
