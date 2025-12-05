@@ -1,0 +1,282 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { fetchCompanyById } from "@/lib/api";
+import { PortfolioCompany } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  ArrowLeft,
+  Building2,
+  DollarSign,
+  TrendingUp,
+  Calendar,
+  Activity,
+  Edit,
+  Trash2,
+} from "lucide-react";
+
+export default function CompanyDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  const [company, setCompany] = useState<PortfolioCompany | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const companyId = params.id as string;
+
+  useEffect(() => {
+    async function loadCompany() {
+      try {
+        setLoading(true);
+        const data = await fetchCompanyById(companyId);
+        setCompany(data);
+        setError(null);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load company details"
+        );
+        console.error("Company detail error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadCompany();
+  }, [companyId]);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const getHealthBadge = (status: string) => {
+    const styles = {
+      green:
+        "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
+      yellow:
+        "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800",
+      red: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800",
+    };
+
+    const labels = {
+      green: "Healthy",
+      yellow: "Watch",
+      red: "Critical",
+    };
+
+    return {
+      className: styles[status as keyof typeof styles] || styles.green,
+      label: labels[status as keyof typeof labels] || status,
+    };
+  };
+
+  return (
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors">
+        {/* Header */}
+        <div className="border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-colors">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => router.push("/portfolio")}
+                  className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                  Back to Portfolio
+                </button>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 transition-colors">
+                    Logged in as
+                  </p>
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 transition-colors">
+                    {user?.email}
+                  </p>
+                </div>
+                <ThemeToggle />
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors text-sm font-medium"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-slate-600 dark:text-slate-400 text-lg transition-colors">
+                Loading company details...
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 transition-colors">
+              <p className="text-red-700 dark:text-red-400 transition-colors">
+                ⚠️ {error}
+              </p>
+              <button
+                onClick={() => router.push("/portfolio")}
+                className="mt-4 text-sm text-red-600 dark:text-red-400 hover:underline"
+              >
+                Go back to portfolio
+              </button>
+            </div>
+          )}
+
+          {/* Company Details */}
+          {company && !loading && (
+            <div className="space-y-6">
+              {/* Company Header */}
+              <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                      <Building2 className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h1 className="text-3xl font-bold text-slate-900 dark:text-white transition-colors">
+                        {company.name}
+                      </h1>
+                      <p className="text-slate-600 dark:text-slate-400 mt-1">
+                        {company.sector}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge
+                      className={getHealthBadge(company.healthStatus).className}
+                      variant="outline"
+                    >
+                      {getHealthBadge(company.healthStatus).label}
+                    </Badge>
+                    <button
+                      className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                      onClick={() => alert("Edit functionality coming soon!")}
+                    >
+                      <Edit className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                    </button>
+                    <button
+                      className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      onClick={() => alert("Delete functionality coming soon!")}
+                    >
+                      <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cards Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Investment Overview */}
+                <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 transition-colors">
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                    <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    Investment Overview
+                  </h2>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Amount Invested
+                      </p>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                        {formatCurrency(company.amountInvested)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Current Valuation
+                      </p>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                        {formatCurrency(company.currentValuation)}
+                      </p>
+                    </div>
+                    <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-slate-600 dark:text-slate-400">
+                          Return
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                          <span className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">
+                            {(
+                              ((company.currentValuation -
+                                company.amountInvested) /
+                                company.amountInvested) *
+                              100
+                            ).toFixed(1)}
+                            %
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Financial Metrics */}
+                <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 transition-colors">
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                    <Activity className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                    Financial Metrics
+                  </h2>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Cash Remaining
+                      </p>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                        {formatCurrency(company.cashRemaining)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Monthly Burn Rate
+                      </p>
+                      <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                        {formatCurrency(company.monthlyBurnRate)}
+                      </p>
+                    </div>
+                    <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          Runway
+                        </span>
+                        <span className="text-lg font-semibold text-slate-900 dark:text-white">
+                          {company.runwayMonths} months
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+}

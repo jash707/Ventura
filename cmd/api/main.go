@@ -101,6 +101,7 @@ func main() {
 		portfolio := api.Group("/portfolio")
 		{
 			portfolio.GET("/companies", portfolioHandler.GetCompanies)
+			portfolio.GET("/companies/:id", portfolioHandler.GetCompany)
 			portfolio.POST("/companies", portfolioHandler.CreateCompany)
 		}
 

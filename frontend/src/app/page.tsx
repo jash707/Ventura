@@ -59,6 +59,12 @@ export default function DashboardPage() {
                 </p>
               </div>
               <div className="flex items-center gap-4">
+                <button
+                  onClick={() => router.push("/portfolio")}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium shadow-lg shadow-blue-500/20"
+                >
+                  View Portfolio
+                </button>
                 <div className="text-right">
                   <p className="text-sm text-slate-600 dark:text-slate-400 transition-colors">
                     Logged in as

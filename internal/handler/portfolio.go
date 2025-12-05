@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 	"ventura/internal/models"
 	"ventura/internal/repository"
 
@@ -46,4 +47,25 @@ func (h *PortfolioHandler) CreateCompany(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, company)
+}
+
+// GetCompany returns a single portfolio company by ID
+func (h *PortfolioHandler) GetCompany(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid company ID"})
+		return
+	}
+
+	company, err := h.portfolioRepo.GetByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Company not found"})
+		return
+	}
+
+	// Calculate health status
+	company.CalculateHealthStatus()
+
+	c.JSON(http.StatusOK, company)
 }
