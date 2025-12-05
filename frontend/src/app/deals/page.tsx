@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { fetchDeals, updateDealStage } from "@/lib/api";
 import { Deal, DealStage } from "@/lib/types";
 import { KanbanBoard } from "@/components/deals/kanban-board";
+import { AddDealModal } from "@/components/deals/add-deal-modal";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +17,7 @@ export default function DealsPage() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadDeals() {
@@ -43,6 +45,10 @@ export default function DealsPage() {
         deal.id === dealId ? { ...deal, stage: newStage } : deal
       )
     );
+  };
+
+  const handleDealCreated = (newDeal: Deal) => {
+    setDeals((prev) => [newDeal, ...prev]);
   };
 
   const handleLogout = async () => {
@@ -109,9 +115,7 @@ export default function DealsPage() {
             </div>
             <button
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/20"
-              onClick={() => {
-                alert("Add deal feature coming soon!");
-              }}
+              onClick={() => setIsModalOpen(true)}
             >
               <Plus className="h-4 w-4" />
               Add Deal
@@ -159,9 +163,7 @@ export default function DealsPage() {
               </p>
               <button
                 className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/20"
-                onClick={() => {
-                  alert("Add deal feature coming soon!");
-                }}
+                onClick={() => setIsModalOpen(true)}
               >
                 <Plus className="h-5 w-5" />
                 Add Your First Deal
@@ -169,6 +171,13 @@ export default function DealsPage() {
             </div>
           )}
         </div>
+
+        {/* Add Deal Modal */}
+        <AddDealModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onDealCreated={handleDealCreated}
+        />
       </div>
     </ProtectedRoute>
   );

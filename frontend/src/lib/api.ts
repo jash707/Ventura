@@ -168,7 +168,7 @@ export async function updateDealStage(
       "Content-Type": "application/json",
     },
     credentials: "include",
-    body: JSON.stringify({ stage }),
+    body: JSON.stringify({ Stage: stage }),
   });
 
   if (response.status === 401) {
