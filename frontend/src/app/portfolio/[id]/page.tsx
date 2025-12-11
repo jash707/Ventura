@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { CompanyFormModal } from "@/components/portfolio/company-form-modal";
 import { DeleteConfirmDialog } from "@/components/portfolio/delete-confirm-dialog";
+import { Footer } from "@/components/Footer";
 import {
   ArrowLeft,
   Building2,
@@ -409,6 +410,9 @@ export default function CompanyDetailPage() {
             loading={deleteLoading}
           />
         )}
+
+        {/* Footer */}
+        <Footer />
       </div>
     </ProtectedRoute>
   );

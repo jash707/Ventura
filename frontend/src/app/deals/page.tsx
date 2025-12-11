@@ -9,6 +9,7 @@ import { AddDealModal } from "@/components/deals/add-deal-modal";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
+import { Footer } from "@/components/Footer";
 import { LayoutGrid, Plus } from "lucide-react";
 
 export default function DealsPage() {
@@ -178,6 +179,9 @@ export default function DealsPage() {
           onClose={() => setIsModalOpen(false)}
           onDealCreated={handleDealCreated}
         />
+
+        {/* Footer */}
+        <Footer />
       </div>
     </ProtectedRoute>
   );

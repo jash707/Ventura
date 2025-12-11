@@ -5,14 +5,26 @@ import { AUMCard } from "@/components/dashboard/aum-card";
 import { PerformanceMetricsCard } from "@/components/dashboard/performance-metrics";
 import { SectorAllocationCard } from "@/components/dashboard/sector-allocation";
 import { PortfolioHealthCard } from "@/components/dashboard/portfolio-health";
-import { fetchDashboardData, DashboardData } from "@/lib/api";
+import { PerformanceHistoryChart } from "@/components/dashboard/performance-history-chart";
+import { SectorComparisonChart } from "@/components/dashboard/sector-comparison-chart";
+import { InvestmentTimeline } from "@/components/dashboard/investment-timeline";
+import {
+  fetchDashboardData,
+  fetchDashboardHistory,
+  DashboardData,
+  DashboardHistoryData,
+} from "@/lib/api";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Footer } from "@/components/Footer";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [historyData, setHistoryData] = useState<DashboardHistoryData | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user, logout } = useAuth();
@@ -22,8 +34,12 @@ export default function DashboardPage() {
     async function loadDashboard() {
       try {
         setLoading(true);
-        const dashboardData = await fetchDashboardData();
+        const [dashboardData, history] = await Promise.all([
+          fetchDashboardData(),
+          fetchDashboardHistory(),
+        ]);
         setData(dashboardData);
+        setHistoryData(history);
         setError(null);
       } catch (err) {
         setError(
@@ -113,52 +129,80 @@ export default function DashboardPage() {
           )}
 
           {data && !loading && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* AUM Card - Spans 1 column */}
-              <div className="lg:col-span-1">
-                <AUMCard
-                  totalDeployed={parseFloat(data.aum.totalDeployed)}
-                  currentValuation={parseFloat(data.aum.currentValuation)}
-                  unrealizedGains={parseFloat(data.aum.unrealizedGains)}
-                />
+            <div className="space-y-8">
+              {/* Top Row - Key Metrics */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* AUM Card - Spans 1 column */}
+                <div className="lg:col-span-1">
+                  <AUMCard
+                    totalDeployed={parseFloat(data.aum.totalDeployed)}
+                    currentValuation={parseFloat(data.aum.currentValuation)}
+                    unrealizedGains={parseFloat(data.aum.unrealizedGains)}
+                  />
+                </div>
+
+                {/* Performance Metrics - Spans 2 columns */}
+                <div className="lg:col-span-2">
+                  <PerformanceMetricsCard
+                    metrics={{
+                      irr: data.performance.irr,
+                      moic: parseFloat(data.performance.moic),
+                      totalDeployed: parseFloat(data.performance.totalDeployed),
+                      currentValue: parseFloat(data.performance.currentValue),
+                      distributions: data.performance.distributions,
+                    }}
+                  />
+                </div>
+
+                {/* Left Column - Sector Allocation + Investment Timeline */}
+                <div className="lg:col-span-1 space-y-6">
+                  <SectorAllocationCard
+                    sectors={data.sectorAllocation.map((s) => ({
+                      sector: s.sector,
+                      value: parseFloat(s.value),
+                      percentage: s.percentage,
+                      color: getColorForSector(s.sector),
+                    }))}
+                  />
+                  {historyData && (
+                    <InvestmentTimeline data={historyData.investmentTimeline} />
+                  )}
+                </div>
+
+                {/* Portfolio Health - Spans 2 columns */}
+                <div className="lg:col-span-2">
+                  <PortfolioHealthCard
+                    green={data.portfolioHealth.green}
+                    yellow={data.portfolioHealth.yellow}
+                    red={data.portfolioHealth.red}
+                  />
+                </div>
               </div>
 
-              {/* Performance Metrics - Spans 2 columns */}
-              <div className="lg:col-span-2">
-                <PerformanceMetricsCard
-                  metrics={{
-                    irr: data.performance.irr,
-                    moic: parseFloat(data.performance.moic),
-                    totalDeployed: parseFloat(data.performance.totalDeployed),
-                    currentValue: parseFloat(data.performance.currentValue),
-                    distributions: data.performance.distributions,
-                  }}
-                />
-              </div>
+              {/* Charts Section */}
+              {historyData && (
+                <>
+                  {/* Performance History - Full Width */}
+                  <div>
+                    <PerformanceHistoryChart
+                      data={historyData.portfolioHistory}
+                    />
+                  </div>
 
-              {/* Sector Allocation - Spans 1 column */}
-              <div className="lg:col-span-1">
-                <SectorAllocationCard
-                  sectors={data.sectorAllocation.map((s) => ({
-                    sector: s.sector,
-                    value: parseFloat(s.value),
-                    percentage: s.percentage,
-                    color: getColorForSector(s.sector),
-                  }))}
-                />
-              </div>
-
-              {/* Portfolio Health - Spans 2 columns */}
-              <div className="lg:col-span-2">
-                <PortfolioHealthCard
-                  green={data.portfolioHealth.green}
-                  yellow={data.portfolioHealth.yellow}
-                  red={data.portfolioHealth.red}
-                />
-              </div>
+                  {/* Sector Comparison - Full Width */}
+                  <div>
+                    <SectorComparisonChart
+                      data={historyData.sectorComparison}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
+
+        {/* Footer */}
+        <Footer />
       </div>
     </ProtectedRoute>
   );

@@ -15,6 +15,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Footer } from "@/components/Footer";
 import { Plus, Building2 } from "lucide-react";
 
 export default function PortfolioPage() {
@@ -273,6 +274,9 @@ export default function PortfolioPage() {
           companyName={companyToDelete?.name || ""}
           loading={deleteLoading}
         />
+
+        {/* Footer */}
+        <Footer />
       </div>
     </ProtectedRoute>
   );

@@ -192,3 +192,136 @@ func (s *AnalyticsService) GetDashboardMetrics(companies []models.PortfolioCompa
 		PortfolioHealth:  s.GetPortfolioHealth(companies),
 	}
 }
+
+// PortfolioHistoryPoint represents a single point in portfolio history
+type PortfolioHistoryPoint struct {
+	Date          string          `json:"date"`
+	TotalInvested decimal.Decimal `json:"totalInvested"`
+	CurrentValue  decimal.Decimal `json:"currentValue"`
+	CompanyCount  int             `json:"companyCount"`
+}
+
+// GetPortfolioHistory generates quarterly portfolio value history
+func (s *AnalyticsService) GetPortfolioHistory(companies []models.PortfolioCompany) []PortfolioHistoryPoint {
+	if len(companies) == 0 {
+		return []PortfolioHistoryPoint{}
+	}
+
+	// Find earliest investment date
+	earliest := time.Now()
+	for _, c := range companies {
+		if c.InvestedAt.Before(earliest) {
+			earliest = c.InvestedAt
+		}
+	}
+
+	// Generate quarterly points from earliest investment to now
+	var history []PortfolioHistoryPoint
+	current := time.Date(earliest.Year(), ((earliest.Month()-1)/3)*3+1, 1, 0, 0, 0, 0, time.UTC)
+	now := time.Now()
+
+	for current.Before(now) || current.Equal(now) {
+		invested := decimal.Zero
+		value := decimal.Zero
+		count := 0
+
+		for _, c := range companies {
+			if c.InvestedAt.Before(current) || c.InvestedAt.Equal(current) {
+				invested = invested.Add(c.AmountInvested)
+				// Estimate value growth linearly for simplicity
+				monthsHeld := current.Sub(c.InvestedAt).Hours() / (24 * 30)
+				totalMonths := now.Sub(c.InvestedAt).Hours() / (24 * 30)
+				if totalMonths > 0 {
+					growth := c.CurrentValuation.Sub(c.AmountInvested)
+					estimatedGrowth := growth.Mul(decimal.NewFromFloat(monthsHeld / totalMonths))
+					value = value.Add(c.AmountInvested.Add(estimatedGrowth))
+				} else {
+					value = value.Add(c.AmountInvested)
+				}
+				count++
+			}
+		}
+
+		history = append(history, PortfolioHistoryPoint{
+			Date:          current.Format("2006-Q") + string('1'+byte((current.Month()-1)/3)),
+			TotalInvested: invested,
+			CurrentValue:  value,
+			CompanyCount:  count,
+		})
+
+		// Move to next quarter
+		current = current.AddDate(0, 3, 0)
+	}
+
+	return history
+}
+
+// InvestmentEvent represents an investment timeline event
+type InvestmentEvent struct {
+	Date        string          `json:"date"`
+	CompanyName string          `json:"companyName"`
+	Sector      string          `json:"sector"`
+	Amount      decimal.Decimal `json:"amount"`
+	RoundStage  string          `json:"roundStage"`
+}
+
+// GetInvestmentTimeline returns chronological list of investments
+func (s *AnalyticsService) GetInvestmentTimeline(companies []models.PortfolioCompany) []InvestmentEvent {
+	var events []InvestmentEvent
+
+	for _, c := range companies {
+		events = append(events, InvestmentEvent{
+			Date:        c.InvestedAt.Format("2006-01-02"),
+			CompanyName: c.Name,
+			Sector:      c.Sector,
+			Amount:      c.AmountInvested,
+			RoundStage:  c.RoundStage,
+		})
+	}
+
+	// Sort by date (newest first)
+	for i := 0; i < len(events)-1; i++ {
+		for j := i + 1; j < len(events); j++ {
+			if events[i].Date < events[j].Date {
+				events[i], events[j] = events[j], events[i]
+			}
+		}
+	}
+
+	return events
+}
+
+// SectorComparisonData represents sector comparison metrics
+type SectorComparisonData struct {
+	Sector        string          `json:"sector"`
+	TotalInvested decimal.Decimal `json:"totalInvested"`
+	CurrentValue  decimal.Decimal `json:"currentValue"`
+	MOIC          decimal.Decimal `json:"moic"`
+	CompanyCount  int             `json:"companyCount"`
+}
+
+// GetSectorComparison returns sector-by-sector comparison with MOIC
+func (s *AnalyticsService) GetSectorComparison(companies []models.PortfolioCompany) []SectorComparisonData {
+	sectorMap := make(map[string]*SectorComparisonData)
+
+	for _, c := range companies {
+		if _, exists := sectorMap[c.Sector]; !exists {
+			sectorMap[c.Sector] = &SectorComparisonData{
+				Sector: c.Sector,
+			}
+		}
+		sectorMap[c.Sector].TotalInvested = sectorMap[c.Sector].TotalInvested.Add(c.AmountInvested)
+		sectorMap[c.Sector].CurrentValue = sectorMap[c.Sector].CurrentValue.Add(c.CurrentValuation)
+		sectorMap[c.Sector].CompanyCount++
+	}
+
+	var result []SectorComparisonData
+	for _, data := range sectorMap {
+		if !data.TotalInvested.IsZero() {
+			data.MOIC = data.CurrentValue.Div(data.TotalInvested)
+		}
+		result = append(result, *data)
+	}
+
+	return result
+}

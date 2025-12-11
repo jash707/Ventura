@@ -95,6 +95,7 @@ func main() {
 			dashboard.GET("/performance", dashboardHandler.GetPerformance)
 			dashboard.GET("/sectors", dashboardHandler.GetSectors)
 			dashboard.GET("/health", dashboardHandler.GetHealth)
+			dashboard.GET("/history", dashboardHandler.GetDashboardHistory)
 		}
 
 		// Portfolio Routes

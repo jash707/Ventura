@@ -53,6 +53,57 @@ export async function fetchDashboardData(): Promise<DashboardData> {
   return response.json();
 }
 
+// Dashboard History Types
+export interface PortfolioHistoryPoint {
+  date: string;
+  totalInvested: string;
+  currentValue: string;
+  companyCount: number;
+}
+
+export interface InvestmentEvent {
+  date: string;
+  companyName: string;
+  sector: string;
+  amount: string;
+  roundStage: string;
+}
+
+export interface SectorComparisonData {
+  sector: string;
+  totalInvested: string;
+  currentValue: string;
+  moic: string;
+  companyCount: number;
+}
+
+export interface DashboardHistoryData {
+  portfolioHistory: PortfolioHistoryPoint[];
+  investmentTimeline: InvestmentEvent[];
+  sectorComparison: SectorComparisonData[];
+}
+
+export async function fetchDashboardHistory(): Promise<DashboardHistoryData> {
+  const response = await fetch(`${API_BASE_URL}/api/dashboard/history`, {
+    credentials: "include",
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch dashboard history: ${response.statusText}`
+    );
+  }
+
+  return response.json();
+}
+
 export async function fetchPortfolioCompanies(): Promise<PortfolioCompany[]> {
   const response = await fetch(`${API_BASE_URL}/api/portfolio/companies`, {
     credentials: "include",

@@ -117,3 +117,27 @@ func (h *DashboardHandler) GetHealth(c *gin.Context) {
 		"red":    health.Red,
 	})
 }
+
+// GetDashboardHistory returns historical metrics for charts
+func (h *DashboardHandler) GetDashboardHistory(c *gin.Context) {
+	companies, err := h.portfolioRepo.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Generate portfolio history based on investment dates
+	portfolioHistory := h.analytics.GetPortfolioHistory(companies)
+
+	// Generate investment timeline
+	investmentTimeline := h.analytics.GetInvestmentTimeline(companies)
+
+	// Generate sector comparison with MOIC
+	sectorComparison := h.analytics.GetSectorComparison(companies)
+
+	c.JSON(http.StatusOK, gin.H{
+		"portfolioHistory":   portfolioHistory,
+		"investmentTimeline": investmentTimeline,
+		"sectorComparison":   sectorComparison,
+	})
+}
