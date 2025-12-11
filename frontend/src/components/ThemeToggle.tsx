@@ -1,13 +1,19 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sun, Moon, Monitor } from "lucide-react";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  // Use lazy initialization to check if we're on the client
-  const [mounted] = useState(() => typeof window !== "undefined");
+  const [mounted, setMounted] = useState(false);
+
+  // Only set mounted to true after client-side hydration
+  // This is the recommended pattern for preventing hydration mismatches with next-themes
+  useEffect(() => {
+    // eslint-disable-next-line
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return <div className="w-10 h-10 rounded-lg bg-muted animate-pulse" />;
