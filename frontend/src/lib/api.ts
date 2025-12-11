@@ -1,4 +1,10 @@
-import { PortfolioCompany, Deal, DealStage } from "./types";
+import {
+  PortfolioCompany,
+  Deal,
+  DealStage,
+  CreateCompanyData,
+  UpdateCompanyData,
+} from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -92,6 +98,94 @@ export async function fetchCompanyById(id: string): Promise<PortfolioCompany> {
   }
 
   return response.json();
+}
+
+export async function createCompany(
+  data: CreateCompanyData
+): Promise<PortfolioCompany> {
+  const response = await fetch(`${API_BASE_URL}/api/portfolio/companies`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to create company");
+  }
+
+  return response.json();
+}
+
+export async function updateCompany(
+  id: number,
+  data: UpdateCompanyData
+): Promise<PortfolioCompany> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/portfolio/companies/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (response.status === 404) {
+    throw new Error("Company not found");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to update company");
+  }
+
+  return response.json();
+}
+
+export async function deleteCompany(id: number): Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/portfolio/companies/${id}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (response.status === 404) {
+    throw new Error("Company not found");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to delete company");
+  }
 }
 
 // Backend response type (PascalCase from Go)

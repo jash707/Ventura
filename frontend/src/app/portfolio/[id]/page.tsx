@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchCompanyById } from "@/lib/api";
-import { PortfolioCompany } from "@/lib/types";
+import { fetchCompanyById, updateCompany, deleteCompany } from "@/lib/api";
+import { PortfolioCompany, CreateCompanyData } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
+import { CompanyFormModal } from "@/components/portfolio/company-form-modal";
+import { DeleteConfirmDialog } from "@/components/portfolio/delete-confirm-dialog";
 import {
   ArrowLeft,
   Building2,
@@ -27,31 +29,72 @@ export default function CompanyDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Modal states
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Toast state
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const companyId = params.id as string;
 
-  useEffect(() => {
-    async function loadCompany() {
-      try {
-        setLoading(true);
-        const data = await fetchCompanyById(companyId);
-        setCompany(data);
-        setError(null);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load company details"
-        );
-        console.error("Company detail error:", err);
-      } finally {
-        setLoading(false);
-      }
+  const loadCompany = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await fetchCompanyById(companyId);
+      setCompany(data);
+      setError(null);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load company details"
+      );
+      console.error("Company detail error:", err);
+    } finally {
+      setLoading(false);
     }
-
-    loadCompany();
   }, [companyId]);
+
+  useEffect(() => {
+    loadCompany();
+  }, [loadCompany]);
 
   const handleLogout = async () => {
     await logout();
     router.push("/login");
+  };
+
+  const handleEditSubmit = async (data: CreateCompanyData) => {
+    if (!company) return;
+    await updateCompany(company.id, data);
+    showToast("Company updated successfully!", "success");
+    await loadCompany();
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!company) return;
+
+    try {
+      setDeleteLoading(true);
+      await deleteCompany(company.id);
+      showToast("Company deleted successfully!", "success");
+      router.push("/portfolio");
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "Failed to delete company",
+        "error"
+      );
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const formatCurrency = (value: number) => {
@@ -87,6 +130,19 @@ export default function CompanyDetailPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors">
+        {/* Toast Notification */}
+        {toast && (
+          <div
+            className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg font-medium animate-in fade-in slide-in-from-top-2 ${
+              toast.type === "success"
+                ? "bg-emerald-600 text-white"
+                : "bg-red-600 text-white"
+            }`}
+          >
+            {toast.message}
+          </div>
+        )}
+
         {/* Header */}
         <div className="border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -163,6 +219,7 @@ export default function CompanyDetailPage() {
                       </h1>
                       <p className="text-slate-600 dark:text-slate-400 mt-1">
                         {company.sector}
+                        {company.roundStage && ` • ${company.roundStage}`}
                       </p>
                     </div>
                   </div>
@@ -175,13 +232,15 @@ export default function CompanyDetailPage() {
                     </Badge>
                     <button
                       className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                      onClick={() => alert("Edit functionality coming soon!")}
+                      onClick={() => setIsEditModalOpen(true)}
+                      title="Edit company"
                     >
                       <Edit className="h-5 w-5 text-slate-600 dark:text-slate-400" />
                     </button>
                     <button
                       className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                      onClick={() => alert("Delete functionality coming soon!")}
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                      title="Delete company"
                     >
                       <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
                     </button>
@@ -243,32 +302,84 @@ export default function CompanyDetailPage() {
                     Financial Metrics
                   </h2>
                   <div className="space-y-4">
-                    <div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Cash Remaining
-                      </p>
-                      <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                        {formatCurrency(company.cashRemaining)}
-                      </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Cash Remaining
+                        </p>
+                        <p className="text-xl font-bold text-slate-900 dark:text-white">
+                          {formatCurrency(company.cashRemaining)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Monthly Revenue
+                        </p>
+                        <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                          {formatCurrency(company.monthlyRevenue || 0)}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">
-                        Monthly Burn Rate
-                      </p>
-                      <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                        {formatCurrency(company.monthlyBurnRate)}
-                      </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Monthly Burn Rate
+                        </p>
+                        <p className="text-xl font-bold text-red-600 dark:text-red-400">
+                          {formatCurrency(company.monthlyBurnRate)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Net Burn (Burn - Revenue)
+                        </p>
+                        <p
+                          className={`text-xl font-bold ${
+                            company.monthlyBurnRate -
+                              (company.monthlyRevenue || 0) >
+                            0
+                              ? "text-amber-600 dark:text-amber-400"
+                              : "text-emerald-600 dark:text-emerald-400"
+                          }`}
+                        >
+                          {formatCurrency(
+                            Math.max(
+                              0,
+                              company.monthlyBurnRate -
+                                (company.monthlyRevenue || 0)
+                            )
+                          )}
+                        </p>
+                      </div>
                     </div>
-                    <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
                           <Calendar className="h-4 w-4" />
-                          Runway
+                          Runway (Gross)
                         </span>
                         <span className="text-lg font-semibold text-slate-900 dark:text-white">
                           {company.runwayMonths} months
                         </span>
                       </div>
+                      {company.monthlyRevenue > 0 && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                            <TrendingUp className="h-4 w-4" />
+                            Runway (Adjusted for Revenue)
+                          </span>
+                          <span className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">
+                            {company.monthlyBurnRate > company.monthlyRevenue
+                              ? Math.floor(
+                                  company.cashRemaining /
+                                    (company.monthlyBurnRate -
+                                      company.monthlyRevenue)
+                                )
+                              : "∞"}{" "}
+                            months
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -276,6 +387,28 @@ export default function CompanyDetailPage() {
             </div>
           )}
         </div>
+
+        {/* Edit Modal */}
+        {company && (
+          <CompanyFormModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            onSubmit={handleEditSubmit}
+            initialData={company}
+            mode="edit"
+          />
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        {company && (
+          <DeleteConfirmDialog
+            isOpen={isDeleteDialogOpen}
+            onClose={() => setIsDeleteDialogOpen(false)}
+            onConfirm={handleDeleteConfirm}
+            companyName={company.name}
+            loading={deleteLoading}
+          />
+        )}
       </div>
     </ProtectedRoute>
   );

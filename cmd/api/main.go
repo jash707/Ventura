@@ -103,6 +103,8 @@ func main() {
 			portfolio.GET("/companies", portfolioHandler.GetCompanies)
 			portfolio.GET("/companies/:id", portfolioHandler.GetCompany)
 			portfolio.POST("/companies", portfolioHandler.CreateCompany)
+			portfolio.PUT("/companies/:id", portfolioHandler.UpdateCompany)
+			portfolio.DELETE("/companies/:id", portfolioHandler.DeleteCompany)
 		}
 
 		// Deal Flow Routes

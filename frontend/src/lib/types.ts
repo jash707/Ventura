@@ -16,9 +16,26 @@ export interface PortfolioCompany {
   currentValuation: number;
   cashRemaining: number;
   monthlyBurnRate: number;
+  monthlyRevenue: number;
   runwayMonths: number;
   healthStatus: "green" | "yellow" | "red";
+  roundStage?: string;
+  investedAt?: string;
 }
+
+export interface CreateCompanyData {
+  name: string;
+  sector: string;
+  amountInvested: number;
+  currentValuation: number;
+  roundStage: string;
+  investedAt: string;
+  cashRemaining: number;
+  monthlyBurnRate: number;
+  monthlyRevenue: number;
+}
+
+export type UpdateCompanyData = Partial<CreateCompanyData>;
 
 export interface PerformanceMetrics {
   irr: number; // Internal Rate of Return (%)

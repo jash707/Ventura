@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 )
 
 type PortfolioCompany struct {
@@ -28,8 +29,9 @@ type PortfolioCompany struct {
 	MonthlyUpdates []MonthlyUpdate `gorm:"foreignKey:CompanyID" json:"monthlyUpdates,omitempty"`
 	Documents      []Document      `gorm:"foreignKey:CompanyID" json:"documents,omitempty"`
 
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"` // Soft delete support
 }
 
 // CalculateRunway computes the remaining runway in months

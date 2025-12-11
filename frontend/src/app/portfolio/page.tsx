@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { fetchPortfolioCompanies } from "@/lib/api";
-import { PortfolioCompany } from "@/lib/types";
+import { useEffect, useState, useCallback } from "react";
+import {
+  fetchPortfolioCompanies,
+  createCompany,
+  updateCompany,
+  deleteCompany,
+} from "@/lib/api";
+import { PortfolioCompany, CreateCompanyData } from "@/lib/types";
 import { CompaniesTable } from "@/components/portfolio/companies-table";
+import { CompanyFormModal } from "@/components/portfolio/company-form-modal";
+import { DeleteConfirmDialog } from "@/components/portfolio/delete-confirm-dialog";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
@@ -17,36 +24,120 @@ export default function PortfolioPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    async function loadPortfolioCompanies() {
-      try {
-        setLoading(true);
-        const data = await fetchPortfolioCompanies();
-        setCompanies(data);
-        setError(null);
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to load portfolio companies"
-        );
-        console.error("Portfolio error:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  // Modal state
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [formMode, setFormMode] = useState<"create" | "edit">("create");
+  const [selectedCompany, setSelectedCompany] =
+    useState<PortfolioCompany | null>(null);
 
-    loadPortfolioCompanies();
+  // Delete dialog state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [companyToDelete, setCompanyToDelete] =
+    useState<PortfolioCompany | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Toast state
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const loadCompanies = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await fetchPortfolioCompanies();
+      setCompanies(data);
+      setError(null);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to load portfolio companies"
+      );
+      console.error("Portfolio error:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadCompanies();
+  }, [loadCompanies]);
 
   const handleLogout = async () => {
     await logout();
     router.push("/login");
   };
 
+  const handleOpenCreateModal = () => {
+    setSelectedCompany(null);
+    setFormMode("create");
+    setIsFormModalOpen(true);
+  };
+
+  const handleOpenEditModal = (company: PortfolioCompany) => {
+    setSelectedCompany(company);
+    setFormMode("edit");
+    setIsFormModalOpen(true);
+  };
+
+  const handleOpenDeleteDialog = (company: PortfolioCompany) => {
+    setCompanyToDelete(company);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleFormSubmit = async (data: CreateCompanyData) => {
+    if (formMode === "create") {
+      await createCompany(data);
+      showToast("Company created successfully!", "success");
+    } else if (selectedCompany) {
+      await updateCompany(selectedCompany.id, data);
+      showToast("Company updated successfully!", "success");
+    }
+    await loadCompanies();
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!companyToDelete) return;
+
+    try {
+      setDeleteLoading(true);
+      await deleteCompany(companyToDelete.id);
+      showToast("Company deleted successfully!", "success");
+      setIsDeleteDialogOpen(false);
+      setCompanyToDelete(null);
+      await loadCompanies();
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "Failed to delete company",
+        "error"
+      );
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors">
+        {/* Toast Notification */}
+        {toast && (
+          <div
+            className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg font-medium animate-in fade-in slide-in-from-top-2 ${
+              toast.type === "success"
+                ? "bg-emerald-600 text-white"
+                : "bg-red-600 text-white"
+            }`}
+          >
+            {toast.message}
+          </div>
+        )}
+
         {/* Header */}
         <div className="border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -104,10 +195,7 @@ export default function PortfolioPage() {
             </div>
             <button
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/20"
-              onClick={() => {
-                // Future: Open add company modal/form
-                alert("Add company feature coming soon!");
-              }}
+              onClick={handleOpenCreateModal}
             >
               <Plus className="h-4 w-4" />
               Add Company
@@ -136,7 +224,13 @@ export default function PortfolioPage() {
           )}
 
           {/* Companies Table */}
-          {!loading && !error && <CompaniesTable companies={companies} />}
+          {!loading && !error && (
+            <CompaniesTable
+              companies={companies}
+              onEdit={handleOpenEditModal}
+              onDelete={handleOpenDeleteDialog}
+            />
+          )}
 
           {/* Empty State */}
           {!loading && !error && companies.length === 0 && (
@@ -150,9 +244,7 @@ export default function PortfolioPage() {
               </p>
               <button
                 className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/20"
-                onClick={() => {
-                  alert("Add company feature coming soon!");
-                }}
+                onClick={handleOpenCreateModal}
               >
                 <Plus className="h-5 w-5" />
                 Add Your First Company
@@ -160,6 +252,27 @@ export default function PortfolioPage() {
             </div>
           )}
         </div>
+
+        {/* Form Modal */}
+        <CompanyFormModal
+          isOpen={isFormModalOpen}
+          onClose={() => setIsFormModalOpen(false)}
+          onSubmit={handleFormSubmit}
+          initialData={selectedCompany}
+          mode={formMode}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteConfirmDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => {
+            setIsDeleteDialogOpen(false);
+            setCompanyToDelete(null);
+          }}
+          onConfirm={handleDeleteConfirm}
+          companyName={companyToDelete?.name || ""}
+          loading={deleteLoading}
+        />
       </div>
     </ProtectedRoute>
   );

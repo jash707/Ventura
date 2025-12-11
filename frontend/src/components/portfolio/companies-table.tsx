@@ -10,10 +10,14 @@ import {
   ArrowDown,
   Search,
   DollarSign,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 
 interface CompaniesTableProps {
   companies: PortfolioCompany[];
+  onEdit?: (company: PortfolioCompany) => void;
+  onDelete?: (company: PortfolioCompany) => void;
 }
 
 type SortField = "name" | "sector" | "amountInvested" | "runwayMonths";
@@ -39,7 +43,11 @@ function SortIcon({
   );
 }
 
-export function CompaniesTable({ companies }: CompaniesTableProps) {
+export function CompaniesTable({
+  companies,
+  onEdit,
+  onDelete,
+}: CompaniesTableProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("name");
@@ -175,6 +183,9 @@ export function CompaniesTable({ companies }: CompaniesTableProps) {
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Current Value
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  Monthly Revenue
+                </th>
                 <th
                   className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700/50 transition-colors"
                   onClick={() => handleSort("runwayMonths")}
@@ -191,13 +202,16 @@ export function CompaniesTable({ companies }: CompaniesTableProps) {
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Health
                 </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-800">
               {filteredAndSortedCompanies.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={8}
                     className="px-6 py-12 text-center text-slate-500 dark:text-slate-400"
                   >
                     {searchTerm
@@ -236,6 +250,11 @@ export function CompaniesTable({ companies }: CompaniesTableProps) {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-emerald-600 dark:text-emerald-400 font-medium">
+                          {formatCurrency(company.monthlyRevenue || 0)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-slate-700 dark:text-slate-300">
                           {company.runwayMonths} months
                         </div>
@@ -247,6 +266,30 @@ export function CompaniesTable({ companies }: CompaniesTableProps) {
                         >
                           {healthBadge.label}
                         </Badge>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEdit?.(company);
+                            }}
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 hover:text-blue-600 dark:hover:text-blue-400"
+                            title="Edit company"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDelete?.(company);
+                            }}
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 hover:text-red-600 dark:hover:text-red-400"
+                            title="Delete company"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

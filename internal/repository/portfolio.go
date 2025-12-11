@@ -33,3 +33,7 @@ func (r *PortfolioRepository) Create(company *models.PortfolioCompany) error {
 func (r *PortfolioRepository) Update(company *models.PortfolioCompany) error {
 	return r.DB.Save(company).Error
 }
+
+func (r *PortfolioRepository) Delete(id uint) error {
+	return r.DB.Delete(&models.PortfolioCompany{}, id).Error
+}
