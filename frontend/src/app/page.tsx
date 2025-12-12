@@ -157,7 +157,7 @@ export default function DashboardPage() {
                 {/* Left Column - Sector Allocation + Investment Timeline */}
                 <div className="lg:col-span-1 space-y-6">
                   <SectorAllocationCard
-                    sectors={data.sectorAllocation.map((s) => ({
+                    sectors={(data.sectorAllocation || []).map((s) => ({
                       sector: s.sector,
                       value: parseFloat(s.value),
                       percentage: s.percentage,
@@ -165,16 +165,18 @@ export default function DashboardPage() {
                     }))}
                   />
                   {historyData && (
-                    <InvestmentTimeline data={historyData.investmentTimeline} />
+                    <InvestmentTimeline
+                      data={historyData.investmentTimeline || []}
+                    />
                   )}
                 </div>
 
                 {/* Portfolio Health - Spans 2 columns */}
                 <div className="lg:col-span-2">
                   <PortfolioHealthCard
-                    green={data.portfolioHealth.green}
-                    yellow={data.portfolioHealth.yellow}
-                    red={data.portfolioHealth.red}
+                    green={data.portfolioHealth?.green || []}
+                    yellow={data.portfolioHealth?.yellow || []}
+                    red={data.portfolioHealth?.red || []}
                   />
                 </div>
               </div>
@@ -185,14 +187,14 @@ export default function DashboardPage() {
                   {/* Performance History - Full Width */}
                   <div>
                     <PerformanceHistoryChart
-                      data={historyData.portfolioHistory}
+                      data={historyData.portfolioHistory || []}
                     />
                   </div>
 
                   {/* Sector Comparison - Full Width */}
                   <div>
                     <SectorComparisonChart
-                      data={historyData.sectorComparison}
+                      data={historyData.sectorComparison || []}
                     />
                   </div>
                 </>
