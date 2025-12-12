@@ -213,15 +213,37 @@ curl -X POST http://localhost:8080/portfolio \
 
 ## Environment Variables
 
-| Variable      | Default     | Description        |
-| ------------- | ----------- | ------------------ |
-| `DB_HOST`     | `localhost` | PostgreSQL host    |
-| `DB_PORT`     | `5433`      | PostgreSQL port    |
-| `DB_USER`     | `postgres`  | Database user      |
-| `DB_PASSWORD` | `postgres`  | Database password  |
-| `DB_NAME`     | `ventura`   | Database name      |
-| `JWT_SECRET`  | (generated) | JWT signing secret |
-| `PORT`        | `8080`      | API server port    |
+### Backend (Render)
+
+| Variable       | Default     | Description                                                           |
+| -------------- | ----------- | --------------------------------------------------------------------- |
+| `DATABASE_URL` | (local DSN) | PostgreSQL connection string (Neon format supported)                  |
+| `FRONTEND_URL` | -           | Production frontend URL for CORS (e.g., `https://ventura.vercel.app`) |
+| `GIN_MODE`     | `debug`     | Set to `release` for production (enables Secure cookies)              |
+| `JWT_SECRET`   | (generated) | JWT signing secret (set a strong secret in production)                |
+| `PORT`         | `8080`      | API server port                                                       |
+
+### Frontend (Vercel)
+
+| Variable              | Default                 | Description     |
+| --------------------- | ----------------------- | --------------- |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8080` | Backend API URL |
+
+### Deployment Notes
+
+1. **Render (Backend)**:
+
+   - Set `DATABASE_URL` to your Neon connection string
+   - Set `FRONTEND_URL` to your Vercel deployment URL
+   - Set `GIN_MODE=release` for production
+   - Set a strong `JWT_SECRET`
+
+2. **Vercel (Frontend)**:
+
+   - Set `NEXT_PUBLIC_API_URL` to your Render backend URL
+
+3. **Neon (Database)**:
+   - Use the connection string provided by Neon (format: `postgres://user:pass@host/db?sslmode=require`)
 
 ## License
 

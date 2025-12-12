@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"os"
 	"strings"
 	"ventura/internal/auth"
 	"ventura/internal/models"
@@ -162,15 +163,23 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 		return
 	}
 
-	// Set new access token cookie
+	// Set new access token cookie with production-aware settings
+	isProduction := os.Getenv("GIN_MODE") == "release"
+	secure := isProduction
+	sameSite := http.SameSiteLaxMode
+	if isProduction {
+		sameSite = http.SameSiteNoneMode
+	}
+
+	c.SetSameSite(sameSite)
 	c.SetCookie(
 		"access_token",
 		accessToken,
 		int(auth.AccessTokenExpiry.Seconds()),
 		"/",
 		"",
-		false, // Set to true in production with HTTPS
-		true,  // httpOnly
+		secure,
+		true, // httpOnly
 	)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Token refreshed successfully"})
@@ -200,34 +209,55 @@ func (h *AuthHandler) Me(c *gin.Context) {
 
 // Logout clears the authentication cookies
 func (h *AuthHandler) Logout(c *gin.Context) {
-	// Clear cookies by setting them to expired
-	c.SetCookie("access_token", "", -1, "/", "", false, true)
-	c.SetCookie("refresh_token", "", -1, "/", "", false, true)
+	// Clear cookies by setting them to expired with production-aware settings
+	isProduction := os.Getenv("GIN_MODE") == "release"
+	secure := isProduction
+	sameSite := http.SameSiteLaxMode
+	if isProduction {
+		sameSite = http.SameSiteNoneMode
+	}
+
+	c.SetSameSite(sameSite)
+	c.SetCookie("access_token", "", -1, "/", "", secure, true)
+	c.SetSameSite(sameSite)
+	c.SetCookie("refresh_token", "", -1, "/", "", secure, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }
 
 // Helper function to set auth cookies
+// In production (GIN_MODE=release), sets Secure=true and SameSite=None for cross-origin cookies
 func setAuthCookies(c *gin.Context, accessToken, refreshToken string) {
-	// Set access token cookie
+	isProduction := os.Getenv("GIN_MODE") == "release"
+
+	// Cookie settings based on environment
+	secure := isProduction
+	sameSite := http.SameSiteLaxMode
+	if isProduction {
+		sameSite = http.SameSiteNoneMode
+	}
+
+	// Set access token cookie using SetSameSite for proper SameSite control
+	c.SetSameSite(sameSite)
 	c.SetCookie(
 		"access_token",
 		accessToken,
 		int(auth.AccessTokenExpiry.Seconds()),
 		"/",
 		"",
-		false, // Set to true in production with HTTPS
-		true,  // httpOnly
+		secure,
+		true, // httpOnly
 	)
 
 	// Set refresh token cookie
+	c.SetSameSite(sameSite)
 	c.SetCookie(
 		"refresh_token",
 		refreshToken,
 		int(auth.RefreshTokenExpiry.Seconds()),
 		"/",
 		"",
-		false, // Set to true in production with HTTPS
-		true,  // httpOnly
+		secure,
+		true, // httpOnly
 	)
 }

@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"os"
+	"strings"
 	"ventura/internal/handler"
 	"ventura/internal/middleware"
 	"ventura/internal/models"
@@ -16,12 +18,21 @@ import (
 )
 
 func main() {
-	// Database connection (using default for now, should be env var)
-	dsn := "host=127.0.0.1 user=postgres password=postgres dbname=ventura port=5433 sslmode=disable"
+	// Database connection
+	// Check for DATABASE_URL (Neon/Render format: postgres://user:pass@host/db?sslmode=require)
+	// Falls back to local DSN if not set
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		// Local development fallback
+		dsn = "host=127.0.0.1 user=postgres password=postgres dbname=ventura port=5433 sslmode=disable"
+	}
+
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
+
+	log.Println("Database connected successfully")
 
 	// Auto Migrate all models
 	db.AutoMigrate(
@@ -58,9 +69,21 @@ func main() {
 	// Router
 	r := gin.Default()
 
-	// CORS Middleware for frontend
+	// CORS Configuration - Support both production and local development
+	allowedOrigins := []string{"http://localhost:3000"}
+	if frontendURL := os.Getenv("FRONTEND_URL"); frontendURL != "" {
+		// Add production frontend URL(s) - can be comma-separated
+		for _, origin := range strings.Split(frontendURL, ",") {
+			origin = strings.TrimSpace(origin)
+			if origin != "" {
+				allowedOrigins = append(allowedOrigins, origin)
+			}
+		}
+	}
+	log.Printf("CORS allowed origins: %v", allowedOrigins)
+
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     allowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
