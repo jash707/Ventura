@@ -17,6 +17,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Ventura Capital - Investment Dashboard",
   description: "VC Investment Dashboard for portfolio management and analytics",
+  icons: {
+    icon: "/ventura-logo.png",
+    apple: "/ventura-logo.png",
+  },
 };
 
 export default function RootLayout({
