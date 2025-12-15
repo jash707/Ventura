@@ -3,14 +3,15 @@ package models
 import "time"
 
 type Founder struct {
-	ID       uint   `gorm:"primaryKey"`
-	Name     string `gorm:"not null"`
-	Email    string `gorm:"uniqueIndex;not null"`
-	Password string `gorm:"not null"` // Hashed
+	ID          uint   `gorm:"primaryKey" json:"id"`
+	Name        string `gorm:"not null" json:"name"`
+	Email       string `gorm:"uniqueIndex;not null" json:"email"`
+	Role        string `gorm:"not null" json:"role"` // CEO, CTO, COO, CFO, etc.
+	LinkedInURL string `json:"linkedInUrl,omitempty"`
 
-	CompanyID uint             `gorm:"index"`
-	Company   PortfolioCompany `gorm:"foreignKey:CompanyID"`
+	CompanyID uint             `gorm:"index" json:"companyId"`
+	Company   PortfolioCompany `gorm:"foreignKey:CompanyID" json:"-"`
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }

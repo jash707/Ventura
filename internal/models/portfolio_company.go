@@ -28,6 +28,7 @@ type PortfolioCompany struct {
 	// Relations
 	MonthlyUpdates []MonthlyUpdate `gorm:"foreignKey:CompanyID" json:"monthlyUpdates,omitempty"`
 	Documents      []Document      `gorm:"foreignKey:CompanyID" json:"documents,omitempty"`
+	Founders       []Founder       `gorm:"foreignKey:CompanyID" json:"founders,omitempty"`
 
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`

@@ -2,14 +2,20 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchCompanyById, updateCompany, deleteCompany } from "@/lib/api";
-import { PortfolioCompany, CreateCompanyData } from "@/lib/types";
+import {
+  fetchCompanyById,
+  updateCompany,
+  deleteCompany,
+  fetchFoundersByCompany,
+} from "@/lib/api";
+import { PortfolioCompany, CreateCompanyData, Founder } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { CompanyFormModal } from "@/components/portfolio/company-form-modal";
 import { DeleteConfirmDialog } from "@/components/portfolio/delete-confirm-dialog";
+import { FoundersSection } from "@/components/portfolio/founders-section";
 import { Footer } from "@/components/Footer";
 import {
   ArrowLeft,
@@ -27,6 +33,7 @@ export default function CompanyDetailPage() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const [company, setCompany] = useState<PortfolioCompany | null>(null);
+  const [founders, setFounders] = useState<Founder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,8 +58,12 @@ export default function CompanyDetailPage() {
   const loadCompany = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await fetchCompanyById(companyId);
-      setCompany(data);
+      const [companyData, foundersData] = await Promise.all([
+        fetchCompanyById(companyId),
+        fetchFoundersByCompany(parseInt(companyId)),
+      ]);
+      setCompany(companyData);
+      setFounders(foundersData);
       setError(null);
     } catch (err) {
       setError(
@@ -61,6 +72,15 @@ export default function CompanyDetailPage() {
       console.error("Company detail error:", err);
     } finally {
       setLoading(false);
+    }
+  }, [companyId]);
+
+  const loadFounders = useCallback(async () => {
+    try {
+      const foundersData = await fetchFoundersByCompany(parseInt(companyId));
+      setFounders(foundersData);
+    } catch (err) {
+      console.error("Failed to reload founders:", err);
     }
   }, [companyId]);
 
@@ -385,6 +405,13 @@ export default function CompanyDetailPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Founders Section */}
+              <FoundersSection
+                companyId={company.id}
+                founders={founders}
+                onFoundersChange={loadFounders}
+              />
             </div>
           )}
         </div>

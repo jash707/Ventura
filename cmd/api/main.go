@@ -51,6 +51,7 @@ func main() {
 	investmentRepo := repository.NewInvestmentRepository(db)
 	portfolioRepo := repository.NewPortfolioRepository(db)
 	dealRepo := repository.NewDealRepository(db)
+	founderRepo := repository.NewFounderRepository(db)
 
 	// Services
 	investmentService := service.NewInvestmentService(investmentRepo)
@@ -62,6 +63,7 @@ func main() {
 	dashboardHandler := handler.NewDashboardHandler(portfolioRepo, analyticsService)
 	dealHandler := handler.NewDealHandler(dealRepo)
 	portfolioHandler := handler.NewPortfolioHandler(portfolioRepo)
+	founderHandler := handler.NewFounderHandler(founderRepo, portfolioRepo)
 
 	// Start Background Workers
 	worker.StartNewsFetcher()
@@ -138,6 +140,19 @@ func main() {
 			deals.POST("", dealHandler.CreateDeal)
 			deals.PATCH("/:id/stage", dealHandler.UpdateDealStage)
 		}
+
+		// Founder Routes
+		founders := api.Group("/founders")
+		{
+			founders.GET("", founderHandler.GetFounders)
+			founders.GET("/:id", founderHandler.GetFounder)
+			founders.PUT("/:id", founderHandler.UpdateFounder)
+			founders.DELETE("/:id", founderHandler.DeleteFounder)
+		}
+
+		// Company-specific founder routes
+		api.GET("/companies/:id/founders", founderHandler.GetFoundersByCompany)
+		api.POST("/companies/:id/founders", founderHandler.CreateFounder)
 	}
 
 	// Start server

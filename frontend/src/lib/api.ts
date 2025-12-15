@@ -4,6 +4,8 @@ import {
   DealStage,
   CreateCompanyData,
   UpdateCompanyData,
+  Founder,
+  CreateFounderData,
 } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -325,5 +327,109 @@ export async function updateDealStage(
 
   if (!response.ok) {
     throw new Error(`Failed to update deal stage: ${response.statusText}`);
+  }
+}
+
+// Founder API functions
+
+export async function fetchFoundersByCompany(
+  companyId: number
+): Promise<Founder[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/companies/${companyId}/founders`,
+    {
+      credentials: "include",
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch founders: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function createFounder(
+  companyId: number,
+  data: CreateFounderData
+): Promise<Founder> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/companies/${companyId}/founders`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to create founder");
+  }
+
+  return response.json();
+}
+
+export async function updateFounder(
+  id: number,
+  data: CreateFounderData
+): Promise<Founder> {
+  const response = await fetch(`${API_BASE_URL}/api/founders/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to update founder");
+  }
+
+  return response.json();
+}
+
+export async function deleteFounder(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/founders/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to delete founder");
   }
 }

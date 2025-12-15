@@ -21,7 +21,28 @@ export interface PortfolioCompany {
   healthStatus: "green" | "yellow" | "red";
   roundStage?: string;
   investedAt?: string;
+  founders?: Founder[];
 }
+
+export interface Founder {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  linkedInUrl?: string;
+  companyId: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateFounderData {
+  name: string;
+  email: string;
+  role: string;
+  linkedInUrl?: string;
+}
+
+export type UpdateFounderData = Partial<CreateFounderData>;
 
 export interface CreateCompanyData {
   name: string;
