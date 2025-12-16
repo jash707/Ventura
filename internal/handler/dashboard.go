@@ -141,3 +141,14 @@ func (h *DashboardHandler) GetDashboardHistory(c *gin.Context) {
 		"sectorComparison":   sectorComparison,
 	})
 }
+
+// GetMissingUpdates returns companies that haven't submitted updates for last month
+func (h *DashboardHandler) GetMissingUpdates(c *gin.Context) {
+	missingUpdates, err := h.portfolioRepo.GetCompaniesWithMissingUpdates()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, missingUpdates)
+}

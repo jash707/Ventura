@@ -136,3 +136,42 @@ func (h *PortfolioHandler) DeleteCompany(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Company deleted successfully"})
 }
+
+// ToggleNotifications toggles the updates notifications for a company
+func (h *PortfolioHandler) ToggleNotifications(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid company ID"})
+		return
+	}
+
+	// Get existing company
+	company, err := h.portfolioRepo.GetByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Company not found"})
+		return
+	}
+
+	// Parse request body
+	var request struct {
+		Enabled bool `json:"enabled"`
+	}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Update notification setting
+	company.UpdatesNotificationsEnabled = request.Enabled
+
+	if err := h.portfolioRepo.Update(company); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":                     "Notifications updated successfully",
+		"updatesNotificationsEnabled": company.UpdatesNotificationsEnabled,
+	})
+}

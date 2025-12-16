@@ -21,6 +21,9 @@ type PortfolioCompany struct {
 	MonthlyBurnRate decimal.Decimal `gorm:"type:decimal(20,2)" json:"monthlyBurnRate"`
 	MonthlyRevenue  decimal.Decimal `gorm:"type:decimal(20,2)" json:"monthlyRevenue"`
 
+	// Notification Settings
+	UpdatesNotificationsEnabled bool `gorm:"default:true" json:"updatesNotificationsEnabled"`
+
 	// Calculated fields
 	RunwayMonths int    `gorm:"-" json:"runwayMonths"` // Calculated: CashRemaining / MonthlyBurnRate
 	HealthStatus string `gorm:"-" json:"healthStatus"` // green, yellow, red

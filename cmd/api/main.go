@@ -52,6 +52,7 @@ func main() {
 	portfolioRepo := repository.NewPortfolioRepository(db)
 	dealRepo := repository.NewDealRepository(db)
 	founderRepo := repository.NewFounderRepository(db)
+	monthlyUpdateRepo := repository.NewMonthlyUpdateRepository(db)
 
 	// Services
 	investmentService := service.NewInvestmentService(investmentRepo)
@@ -64,6 +65,7 @@ func main() {
 	dealHandler := handler.NewDealHandler(dealRepo)
 	portfolioHandler := handler.NewPortfolioHandler(portfolioRepo)
 	founderHandler := handler.NewFounderHandler(founderRepo, portfolioRepo)
+	monthlyUpdateHandler := handler.NewMonthlyUpdateHandler(monthlyUpdateRepo, portfolioRepo)
 
 	// Start Background Workers
 	worker.StartNewsFetcher()
@@ -121,6 +123,7 @@ func main() {
 			dashboard.GET("/sectors", dashboardHandler.GetSectors)
 			dashboard.GET("/health", dashboardHandler.GetHealth)
 			dashboard.GET("/history", dashboardHandler.GetDashboardHistory)
+			dashboard.GET("/missing-updates", dashboardHandler.GetMissingUpdates)
 		}
 
 		// Portfolio Routes
@@ -131,6 +134,7 @@ func main() {
 			portfolio.POST("/companies", portfolioHandler.CreateCompany)
 			portfolio.PUT("/companies/:id", portfolioHandler.UpdateCompany)
 			portfolio.DELETE("/companies/:id", portfolioHandler.DeleteCompany)
+			portfolio.PATCH("/companies/:id/notifications", portfolioHandler.ToggleNotifications)
 		}
 
 		// Deal Flow Routes
@@ -153,6 +157,19 @@ func main() {
 		// Company-specific founder routes
 		api.GET("/companies/:id/founders", founderHandler.GetFoundersByCompany)
 		api.POST("/companies/:id/founders", founderHandler.CreateFounder)
+
+		// Monthly Update Routes
+		updates := api.Group("/monthly-updates")
+		{
+			updates.GET("", monthlyUpdateHandler.GetMonthlyUpdates)
+			updates.GET("/:id", monthlyUpdateHandler.GetMonthlyUpdate)
+			updates.PUT("/:id", monthlyUpdateHandler.UpdateMonthlyUpdate)
+			updates.DELETE("/:id", monthlyUpdateHandler.DeleteMonthlyUpdate)
+		}
+
+		// Company-specific monthly update routes
+		api.GET("/companies/:id/updates", monthlyUpdateHandler.GetMonthlyUpdatesByCompany)
+		api.POST("/companies/:id/updates", monthlyUpdateHandler.CreateMonthlyUpdate)
 	}
 
 	// Start server

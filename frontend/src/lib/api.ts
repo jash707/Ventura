@@ -6,6 +6,9 @@ import {
   UpdateCompanyData,
   Founder,
   CreateFounderData,
+  MonthlyUpdate,
+  CreateMonthlyUpdateData,
+  MissingUpdateInfo,
 } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -432,4 +435,162 @@ export async function deleteFounder(id: number): Promise<void> {
     const error = await response.json();
     throw new Error(error.error || "Failed to delete founder");
   }
+}
+
+// Monthly Update API functions
+
+export async function fetchMonthlyUpdatesByCompany(
+  companyId: number
+): Promise<MonthlyUpdate[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/companies/${companyId}/updates`,
+    {
+      credentials: "include",
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch monthly updates: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function createMonthlyUpdate(
+  companyId: number,
+  data: CreateMonthlyUpdateData
+): Promise<MonthlyUpdate> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/companies/${companyId}/updates`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to create monthly update");
+  }
+
+  return response.json();
+}
+
+export async function updateMonthlyUpdate(
+  id: number,
+  data: CreateMonthlyUpdateData
+): Promise<MonthlyUpdate> {
+  const response = await fetch(`${API_BASE_URL}/api/monthly-updates/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to update monthly update");
+  }
+
+  return response.json();
+}
+
+export async function deleteMonthlyUpdate(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/monthly-updates/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to delete monthly update");
+  }
+}
+
+// Missing Updates / Notifications
+
+export async function fetchMissingUpdates(): Promise<MissingUpdateInfo[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/dashboard/missing-updates`,
+    {
+      credentials: "include",
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to fetch missing updates");
+  }
+
+  return response.json();
+}
+
+export async function toggleCompanyNotifications(
+  companyId: number,
+  enabled: boolean
+): Promise<{ updatesNotificationsEnabled: boolean }> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/portfolio/companies/${companyId}/notifications`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ enabled }),
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to toggle notifications");
+  }
+
+  return response.json();
 }

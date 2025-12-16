@@ -7,6 +7,7 @@ import {
   updateCompany,
   deleteCompany,
   fetchFoundersByCompany,
+  toggleCompanyNotifications,
 } from "@/lib/api";
 import { PortfolioCompany, CreateCompanyData, Founder } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CompanyFormModal } from "@/components/portfolio/company-form-modal";
 import { DeleteConfirmDialog } from "@/components/portfolio/delete-confirm-dialog";
 import { FoundersSection } from "@/components/portfolio/founders-section";
+import UpdatesSection from "@/components/portfolio/updates-section";
 import { Footer } from "@/components/Footer";
 import {
   ArrowLeft,
@@ -26,6 +28,8 @@ import {
   Activity,
   Edit,
   Trash2,
+  Bell,
+  BellOff,
 } from "lucide-react";
 
 export default function CompanyDetailPage() {
@@ -41,6 +45,7 @@ export default function CompanyDetailPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [notificationsToggling, setNotificationsToggling] = useState(false);
 
   // Toast state
   const [toast, setToast] = useState<{
@@ -252,6 +257,50 @@ export default function CompanyDetailPage() {
                       {getHealthBadge(company.healthStatus).label}
                     </Badge>
                     <button
+                      className={`p-2 rounded-lg transition-colors ${
+                        company.updatesNotificationsEnabled !== false
+                          ? "hover:bg-slate-100 dark:hover:bg-slate-800"
+                          : "bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                      }`}
+                      onClick={async () => {
+                        try {
+                          setNotificationsToggling(true);
+                          const newValue =
+                            company.updatesNotificationsEnabled === false;
+                          await toggleCompanyNotifications(
+                            company.id,
+                            newValue
+                          );
+                          setCompany({
+                            ...company,
+                            updatesNotificationsEnabled: newValue,
+                          });
+                          showToast(
+                            newValue
+                              ? "Notifications enabled"
+                              : "Notifications disabled",
+                            "success"
+                          );
+                        } catch (err) {
+                          showToast("Failed to toggle notifications", "error");
+                        } finally {
+                          setNotificationsToggling(false);
+                        }
+                      }}
+                      disabled={notificationsToggling}
+                      title={
+                        company.updatesNotificationsEnabled !== false
+                          ? "Disable update notifications"
+                          : "Enable update notifications"
+                      }
+                    >
+                      {company.updatesNotificationsEnabled !== false ? (
+                        <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                      ) : (
+                        <BellOff className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                      )}
+                    </button>
+                    <button
                       className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                       onClick={() => setIsEditModalOpen(true)}
                       title="Edit company"
@@ -412,6 +461,9 @@ export default function CompanyDetailPage() {
                 founders={founders}
                 onFoundersChange={loadFounders}
               />
+
+              {/* Monthly Updates Section */}
+              <UpdatesSection companyId={company.id} />
             </div>
           )}
         </div>

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"time"
 	"ventura/internal/models"
 
 	"gorm.io/gorm"
@@ -36,4 +37,63 @@ func (r *PortfolioRepository) Update(company *models.PortfolioCompany) error {
 
 func (r *PortfolioRepository) Delete(id uint) error {
 	return r.DB.Delete(&models.PortfolioCompany{}, id).Error
+}
+
+// MissingUpdateInfo represents a company with missing update info
+type MissingUpdateInfo struct {
+	ID              uint       `json:"id"`
+	Name            string     `json:"name"`
+	Sector          string     `json:"sector"`
+	LastUpdateDate  *time.Time `json:"lastUpdateDate"`
+	DaysSinceUpdate int        `json:"daysSinceUpdate"`
+}
+
+// GetCompaniesWithMissingUpdates returns companies that haven't submitted updates for last month
+func (r *PortfolioRepository) GetCompaniesWithMissingUpdates() ([]MissingUpdateInfo, error) {
+	var result []MissingUpdateInfo
+
+	// Get first day of last month
+	now := time.Now()
+	firstOfCurrentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+	firstOfLastMonth := firstOfCurrentMonth.AddDate(0, -1, 0)
+
+	// Query companies with notifications enabled that don't have an update for last month
+	rows, err := r.DB.Raw(`
+		SELECT 
+			pc.id,
+			pc.name,
+			pc.sector,
+			(SELECT MAX(mu.report_month) FROM monthly_updates mu WHERE mu.company_id = pc.id) as last_update_date
+		FROM portfolio_companies pc
+		WHERE pc.deleted_at IS NULL
+		AND pc.updates_notifications_enabled = true
+		AND NOT EXISTS (
+			SELECT 1 FROM monthly_updates mu 
+			WHERE mu.company_id = pc.id 
+			AND mu.report_month >= ?
+			AND mu.report_month < ?
+		)
+	`, firstOfLastMonth, firstOfCurrentMonth).Rows()
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var info MissingUpdateInfo
+		var lastUpdate *time.Time
+		if err := rows.Scan(&info.ID, &info.Name, &info.Sector, &lastUpdate); err != nil {
+			return nil, err
+		}
+		info.LastUpdateDate = lastUpdate
+		if lastUpdate != nil {
+			info.DaysSinceUpdate = int(now.Sub(*lastUpdate).Hours() / 24)
+		} else {
+			info.DaysSinceUpdate = -1 // Never submitted
+		}
+		result = append(result, info)
+	}
+
+	return result, nil
 }

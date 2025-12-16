@@ -22,6 +22,7 @@ export interface PortfolioCompany {
   roundStage?: string;
   investedAt?: string;
   founders?: Founder[];
+  updatesNotificationsEnabled?: boolean;
 }
 
 export interface Founder {
@@ -125,4 +126,40 @@ export interface Deal {
   notes: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface MonthlyUpdate {
+  id: number;
+  companyId: number;
+  mrr: string;
+  arr: string;
+  cashInBank: string;
+  burnRate: string;
+  newCustomers: number;
+  churnRate: string;
+  reportMonth: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateMonthlyUpdateData {
+  mrr: number;
+  arr: number;
+  cashInBank: number;
+  burnRate: number;
+  newCustomers?: number;
+  churnRate?: number;
+  reportMonth: string;
+  notes?: string;
+}
+
+export type UpdateMonthlyUpdateData = Partial<CreateMonthlyUpdateData>;
+
+export interface MissingUpdateInfo {
+  id: number;
+  name: string;
+  sector: string;
+  lastUpdateDate: string | null;
+  daysSinceUpdate: number;
 }

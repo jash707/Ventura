@@ -8,6 +8,7 @@ import { PortfolioHealthCard } from "@/components/dashboard/portfolio-health";
 import { PerformanceHistoryChart } from "@/components/dashboard/performance-history-chart";
 import { SectorComparisonChart } from "@/components/dashboard/sector-comparison-chart";
 import { InvestmentTimeline } from "@/components/dashboard/investment-timeline";
+import MissingUpdatesAlert from "@/components/dashboard/missing-updates-alert";
 import {
   fetchDashboardData,
   fetchDashboardHistory,
@@ -130,6 +131,9 @@ export default function DashboardPage() {
 
           {data && !loading && (
             <div className="space-y-8">
+              {/* Missing Updates Alert */}
+              <MissingUpdatesAlert />
+
               {/* Top Row - Key Metrics */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* AUM Card - Spans 1 column */}
