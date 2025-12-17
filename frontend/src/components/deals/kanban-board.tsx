@@ -59,7 +59,32 @@ export function KanbanBoard({ deals, onDealStageChange }: KanbanBoardProps) {
     }
 
     const dealId = active.id as number;
-    const newStage = over.id as DealStage;
+
+    // Determine the new stage - over.id can be either:
+    // 1. A stage string (when dropping on the column droppable zone)
+    // 2. A deal's numeric ID (when dropping on another deal card)
+    const validStages = [
+      "incoming",
+      "screening",
+      "due_diligence",
+      "term_sheet",
+      "closed",
+      "lost",
+    ];
+    let newStage: DealStage;
+
+    if (typeof over.id === "string" && validStages.includes(over.id)) {
+      // Dropped on the column droppable zone
+      newStage = over.id as DealStage;
+    } else {
+      // Dropped on another deal card - find that deal's stage
+      const targetDeal = localDeals.find((d) => d.id === over.id);
+      if (!targetDeal) {
+        setActiveDeal(null);
+        return;
+      }
+      newStage = targetDeal.stage;
+    }
 
     const deal = localDeals.find((d) => d.id === dealId);
     if (!deal || deal.stage === newStage) {
