@@ -13,8 +13,8 @@ var (
 	jwtSecret = []byte("your-secret-key-change-in-production")
 
 	// Token expiration times
-	AccessTokenExpiry  = 24 * time.Hour     // 24 hours
-	RefreshTokenExpiry = 7 * 24 * time.Hour // 7 days
+	AccessTokenExpiry  = 1 * time.Hour  // 1 hour
+	RefreshTokenExpiry = 24 * time.Hour // 24 hours
 )
 
 // Claims represents the JWT claims
