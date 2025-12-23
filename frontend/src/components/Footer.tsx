@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Twitter, Github, Linkedin, Mail } from "lucide-react";
 
 export function Footer() {
   return (
@@ -10,9 +11,35 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Tagline */}
           <div className="md:col-span-1">
-            <p className="text-xl font-medium text-slate-900 dark:text-white">
+            <p className="text-xl font-medium text-slate-900 dark:text-white mb-6">
               Experience growth
             </p>
+            <div className="flex gap-4">
+              <Link
+                href="#"
+                className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              >
+                <Twitter className="h-5 w-5" />
+              </Link>
+              <Link
+                href="#"
+                className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              >
+                <Github className="h-5 w-5" />
+              </Link>
+              <Link
+                href="#"
+                className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              >
+                <Linkedin className="h-5 w-5" />
+              </Link>
+              <Link
+                href="mailto:contact@ventura.com"
+                className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              >
+                <Mail className="h-5 w-5" />
+              </Link>
+            </div>
           </div>
 
           {/* Platform Links */}
@@ -46,9 +73,12 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <span className="text-sm text-slate-600 dark:text-slate-400">
+                <Link
+                  href="#"
+                  className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
                   Analytics
-                </span>
+                </Link>
               </li>
             </ul>
           </div>
@@ -60,19 +90,28 @@ export function Footer() {
             </h3>
             <ul className="space-y-3">
               <li>
-                <span className="text-sm text-slate-600 dark:text-slate-400">
+                <Link
+                  href="/docs"
+                  className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
                   Documentation
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="text-sm text-slate-600 dark:text-slate-400">
+                <Link
+                  href="/api-reference"
+                  className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
                   API Reference
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="text-sm text-slate-600 dark:text-slate-400">
+                <Link
+                  href="/support"
+                  className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
                   Support
-                </span>
+                </Link>
               </li>
             </ul>
           </div>
@@ -84,19 +123,28 @@ export function Footer() {
             </h3>
             <ul className="space-y-3">
               <li>
-                <span className="text-sm text-slate-600 dark:text-slate-400">
+                <Link
+                  href="/about"
+                  className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
                   About
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="text-sm text-slate-600 dark:text-slate-400">
+                <Link
+                  href="/careers"
+                  className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
                   Careers
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="text-sm text-slate-600 dark:text-slate-400">
+                <Link
+                  href="/contact"
+                  className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
                   Contact
-                </span>
+                </Link>
               </li>
             </ul>
           </div>
@@ -118,18 +166,30 @@ export function Footer() {
               © 2025 Ventura Capital
             </p>
             <div className="flex items-center gap-6">
-              <span className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+              <Link
+                href="/about"
+                className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+              >
                 About Ventura
-              </span>
-              <span className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+              </Link>
+              <Link
+                href="/portfolio"
+                className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+              >
                 Portfolio Companies
-              </span>
-              <span className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+              </Link>
+              <Link
+                href="#"
+                className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+              >
                 Privacy
-              </span>
-              <span className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">
+              </Link>
+              <Link
+                href="#"
+                className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+              >
                 Terms
-              </span>
+              </Link>
             </div>
           </div>
         </div>
