@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"ventura/internal/auth"
 
@@ -61,7 +62,9 @@ func RequireRole(role string) gin.HandlerFunc {
 			return
 		}
 
-		if userRole != role {
+		// Convert userRole to string for comparison (it's models.UserRole which is a string type)
+		userRoleStr := fmt.Sprintf("%v", userRole)
+		if userRoleStr != role {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions"})
 			c.Abort()
 			return

@@ -18,6 +18,9 @@ type Container struct {
 	PortfolioHandler     *handler.PortfolioHandler
 	FounderHandler       *handler.FounderHandler
 	MonthlyUpdateHandler *handler.MonthlyUpdateHandler
+	UserHandler          *handler.UserHandler
+	AuditHandler         *handler.AuditHandler
+	TeamHandler          *handler.TeamHandler
 }
 
 // NewContainer creates and wires up all dependencies
@@ -29,6 +32,8 @@ func NewContainer(db *gorm.DB) *Container {
 	dealRepo := repository.NewDealRepository(db)
 	founderRepo := repository.NewFounderRepository(db)
 	monthlyUpdateRepo := repository.NewMonthlyUpdateRepository(db)
+	auditLogRepo := repository.NewAuditLogRepository(db)
+	teamAssignmentRepo := repository.NewTeamAssignmentRepository(db)
 
 	// Services
 	investmentService := service.NewInvestmentService(investmentRepo)
@@ -43,5 +48,8 @@ func NewContainer(db *gorm.DB) *Container {
 		PortfolioHandler:     handler.NewPortfolioHandler(portfolioRepo),
 		FounderHandler:       handler.NewFounderHandler(founderRepo, portfolioRepo),
 		MonthlyUpdateHandler: handler.NewMonthlyUpdateHandler(monthlyUpdateRepo, portfolioRepo),
+		UserHandler:          handler.NewUserHandler(userRepo, auditLogRepo),
+		AuditHandler:         handler.NewAuditHandler(auditLogRepo),
+		TeamHandler:          handler.NewTeamHandler(teamAssignmentRepo, userRepo, portfolioRepo, auditLogRepo),
 	}
 }

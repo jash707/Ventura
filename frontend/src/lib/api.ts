@@ -9,6 +9,12 @@ import {
   MonthlyUpdate,
   CreateMonthlyUpdateData,
   MissingUpdateInfo,
+  UserWithDetails,
+  AuditLogResponse,
+  InviteUserData,
+  UpdateUserData,
+  TeamMember,
+  AddTeamMemberData,
 } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -593,4 +599,242 @@ export async function toggleCompanyNotifications(
   }
 
   return response.json();
+}
+
+// ============================================
+// Admin API Functions
+// ============================================
+
+export async function fetchUsers(): Promise<UserWithDetails[]> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+    credentials: "include",
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (response.status === 403) {
+    throw new Error("Forbidden: Admin access required");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch users: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function updateUser(
+  id: number,
+  data: UpdateUserData
+): Promise<UserWithDetails> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (response.status === 403) {
+    throw new Error("Forbidden: Admin access required");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to update user");
+  }
+
+  return response.json();
+}
+
+export async function deleteUser(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (response.status === 403) {
+    throw new Error("Forbidden: Admin access required");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to delete user");
+  }
+}
+
+export async function inviteUser(
+  data: InviteUserData
+): Promise<{ user: UserWithDetails; tempPassword: string }> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/users/invite`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (response.status === 403) {
+    throw new Error("Forbidden: Admin access required");
+  }
+
+  if (response.status === 409) {
+    throw new Error("User with this email already exists");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to invite user");
+  }
+
+  return response.json();
+}
+
+export async function fetchAuditLogs(
+  page = 1,
+  limit = 50,
+  filters?: { userId?: number; entity?: string; action?: string }
+): Promise<AuditLogResponse> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+
+  if (filters?.userId) params.append("userId", filters.userId.toString());
+  if (filters?.entity) params.append("entity", filters.entity);
+  if (filters?.action) params.append("action", filters.action);
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/audit-logs?${params}`,
+    {
+      credentials: "include",
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (response.status === 403) {
+    throw new Error("Forbidden: Admin access required");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch audit logs: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+// ============================================
+// Team Assignment API Functions
+// ============================================
+
+export async function fetchCompanyTeam(
+  companyId: number
+): Promise<TeamMember[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/companies/${companyId}/team`,
+    {
+      credentials: "include",
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch team: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function addTeamMember(
+  companyId: number,
+  data: AddTeamMemberData
+): Promise<TeamMember> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/companies/${companyId}/team`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (response.status === 409) {
+    throw new Error("User is already assigned to this company");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to add team member");
+  }
+
+  return response.json();
+}
+
+export async function removeTeamMember(
+  companyId: number,
+  userId: number
+): Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/companies/${companyId}/team/${userId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    }
+  );
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to remove team member");
+  }
 }

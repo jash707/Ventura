@@ -43,5 +43,7 @@ func runMigrations(db *gorm.DB) {
 		&models.Founder{},
 		&models.MonthlyUpdate{},
 		&models.Document{},
+		&models.AuditLog{},
+		&models.TeamAssignment{},
 	)
 }

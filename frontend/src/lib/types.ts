@@ -163,3 +163,56 @@ export interface MissingUpdateInfo {
   lastUpdateDate: string | null;
   daysSinceUpdate: number;
 }
+
+// Admin types
+export interface UserWithDetails extends User {
+  createdAt: string;
+}
+
+export interface AuditLog {
+  id: number;
+  userId: number;
+  userEmail: string;
+  userName: string;
+  action: string;
+  entity: string;
+  entityId: number;
+  details: string;
+  ipAddress: string;
+  createdAt: string;
+}
+
+export interface AuditLogResponse {
+  logs: AuditLog[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface InviteUserData {
+  email: string;
+  name: string;
+  role?: "admin" | "viewer";
+}
+
+export interface UpdateUserData {
+  name?: string;
+  role?: "admin" | "viewer";
+}
+
+// Team assignment types
+export type TeamRole = "lead" | "analyst" | "observer";
+
+export interface TeamMember {
+  id: number;
+  userId: number;
+  userEmail: string;
+  userName: string;
+  role: TeamRole;
+  createdAt: string;
+}
+
+export interface AddTeamMemberData {
+  userId: number;
+  role?: TeamRole;
+}

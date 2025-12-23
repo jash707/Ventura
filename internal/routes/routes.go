@@ -54,6 +54,8 @@ func registerAPIRoutes(r *gin.Engine, c *di.Container) {
 		registerDealRoutes(api, c)
 		registerFounderRoutes(api, c)
 		registerMonthlyUpdateRoutes(api, c)
+		registerTeamRoutes(api, c)
+		registerAdminRoutes(api, c)
 	}
 }
 
@@ -122,4 +124,29 @@ func registerMonthlyUpdateRoutes(api *gin.RouterGroup, c *di.Container) {
 	// Company-specific monthly update routes
 	api.GET("/companies/:id/updates", c.MonthlyUpdateHandler.GetMonthlyUpdatesByCompany)
 	api.POST("/companies/:id/updates", c.MonthlyUpdateHandler.CreateMonthlyUpdate)
+}
+
+// registerTeamRoutes sets up team assignment routes
+func registerTeamRoutes(api *gin.RouterGroup, c *di.Container) {
+	// Team routes are nested under companies
+	api.GET("/companies/:id/team", c.TeamHandler.GetCompanyTeam)
+	api.POST("/companies/:id/team", c.TeamHandler.AddTeamMember)
+	api.DELETE("/companies/:id/team/:userId", c.TeamHandler.RemoveTeamMember)
+}
+
+// registerAdminRoutes sets up admin-only routes
+func registerAdminRoutes(api *gin.RouterGroup, c *di.Container) {
+	admin := api.Group("/admin")
+	admin.Use(middleware.RequireRole("admin"))
+	{
+		// User management
+		admin.GET("/users", c.UserHandler.GetUsers)
+		admin.GET("/users/:id", c.UserHandler.GetUser)
+		admin.PUT("/users/:id", c.UserHandler.UpdateUser)
+		admin.DELETE("/users/:id", c.UserHandler.DeleteUser)
+		admin.POST("/users/invite", c.UserHandler.InviteUser)
+
+		// Audit logs
+		admin.GET("/audit-logs", c.AuditHandler.GetAuditLogs)
+	}
 }

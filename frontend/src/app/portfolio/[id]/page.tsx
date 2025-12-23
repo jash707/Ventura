@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CompanyFormModal } from "@/components/portfolio/company-form-modal";
 import { DeleteConfirmDialog } from "@/components/portfolio/delete-confirm-dialog";
 import { FoundersSection } from "@/components/portfolio/founders-section";
+import { TeamSection } from "@/components/portfolio/team-section";
 import UpdatesSection from "@/components/portfolio/updates-section";
 import { Footer } from "@/components/Footer";
 import {
@@ -461,6 +462,9 @@ export default function CompanyDetailPage() {
                 founders={founders}
                 onFoundersChange={loadFounders}
               />
+
+              {/* Team Assignments Section */}
+              <TeamSection companyId={company.id} companyName={company.name} />
 
               {/* Monthly Updates Section */}
               <UpdatesSection companyId={company.id} />
