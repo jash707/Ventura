@@ -9,6 +9,10 @@ import {
   fetchUsers,
 } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
+import { Plus } from "lucide-react";
 
 interface TeamSectionProps {
   companyId: number;
@@ -110,7 +114,7 @@ export function TeamSection({ companyId, companyName }: TeamSectionProps) {
     return (
       <div className="bg-white/50 dark:bg-gray-900/50 rounded-xl border border-slate-200 dark:border-gray-800 p-6 transition-colors">
         <div className="flex justify-center py-4">
-          <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-500"></div>
+          <Spinner />
         </div>
       </div>
     );
@@ -131,24 +135,14 @@ export function TeamSection({ companyId, companyName }: TeamSectionProps) {
           Team Members
         </h3>
         {isAdmin && (
-          <button
+          <Button
+            size="sm"
             onClick={handleOpenAddModal}
-            className="px-3 py-1.5 bg-indigo-100 dark:bg-indigo-600/20 hover:bg-indigo-200 dark:hover:bg-indigo-600/40 text-indigo-600 dark:text-indigo-400 text-sm rounded-lg transition-colors flex items-center gap-1"
+            className="bg-indigo-100 dark:bg-indigo-600/20 hover:bg-indigo-200 dark:hover:bg-indigo-600/40 text-indigo-600 dark:text-indigo-400 border-transparent shadow-none"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <Plus className="h-4 w-4 mr-1" />
             Add Member
-          </button>
+          </Button>
         )}
       </div>
 
@@ -197,13 +191,12 @@ export function TeamSection({ companyId, companyName }: TeamSectionProps) {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeClass(
-                    member.role
-                  )}`}
+                <Badge
+                  className={`text-xs ${getRoleBadgeClass(member.role)}`}
+                  variant="outline"
                 >
                   {member.role}
-                </span>
+                </Badge>
                 {isAdmin && (
                   <button
                     onClick={() =>

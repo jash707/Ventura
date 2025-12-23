@@ -7,6 +7,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { Badge } from "@/components/ui/badge";
 
 interface KanbanColumnProps {
   title: string;
@@ -31,9 +32,9 @@ export function KanbanColumn({
           <h3 className="font-semibold text-slate-900 dark:text-white">
             {title}
           </h3>
-          <span className="px-2 py-1 text-xs font-medium bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full">
+          <Badge variant="secondary" className="rounded-full">
             {count}
-          </span>
+          </Badge>
         </div>
       </div>
 

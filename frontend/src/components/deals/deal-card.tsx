@@ -53,11 +53,11 @@ export function DealCard({ deal }: DealCardProps) {
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing"
+      className="card-base p-4 hover:shadow-md cursor-grab active:cursor-grabbing"
     >
       {/* Company Name */}
       <div className="flex items-start gap-2 mb-3">
-        <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+        <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-slate-900 dark:text-white truncate">
             {deal.companyName}

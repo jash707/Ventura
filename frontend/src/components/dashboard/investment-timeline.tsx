@@ -57,7 +57,7 @@ export function InvestmentTimeline({ data }: InvestmentTimelineProps) {
   );
 
   return (
-    <Card className="p-6 bg-card border-border">
+    <Card className="p-6 card-base">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-card-foreground">
           Investment Timeline
@@ -94,7 +94,7 @@ export function InvestmentTimeline({ data }: InvestmentTimelineProps) {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
                       <span className="font-medium text-card-foreground truncate">
                         {event.companyName}
                       </span>
@@ -114,10 +114,10 @@ export function InvestmentTimeline({ data }: InvestmentTimelineProps) {
                       <span className="text-muted-foreground">
                         {formatDate(event.date)}
                       </span>
-                      <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                      <div className="shrink-0 w-24 text-sm text-slate-500 dark:text-slate-400">
                         <DollarSign className="h-3 w-3" />
                         {formatCurrency(event.amount)}
-                      </span>
+                      </div>
                       {event.roundStage && (
                         <span className="text-muted-foreground">
                           {event.roundStage}

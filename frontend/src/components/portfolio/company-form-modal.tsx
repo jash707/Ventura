@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { CreateCompanyData, PortfolioCompany } from "@/lib/types";
 
 interface CompanyFormModalProps {
@@ -127,12 +129,14 @@ export function CompanyFormModal({
               ? "Add Portfolio Company"
               : "Edit Portfolio Company"}
           </h2>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            className="h-8 w-8 p-0"
           >
-            <X className="h-5 w-5 text-slate-500" />
-          </button>
+            <X className="h-5 w-5" />
+          </Button>
         </div>
 
         {/* Form */}
@@ -153,13 +157,12 @@ export function CompanyFormModal({
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Company Name *
                 </label>
-                <input
+                <Input
                   type="text"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   placeholder="Acme Corp"
                 />
               </div>
@@ -172,7 +175,7 @@ export function CompanyFormModal({
                   onChange={(e) =>
                     setFormData({ ...formData, sector: e.target.value })
                   }
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:focus:ring-indigo-400"
                 >
                   {SECTORS.map((sector) => (
                     <option key={sector} value={sector}>
@@ -193,7 +196,7 @@ export function CompanyFormModal({
                   onChange={(e) =>
                     setFormData({ ...formData, roundStage: e.target.value })
                   }
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:focus:ring-indigo-400"
                 >
                   {ROUND_STAGES.map((stage) => (
                     <option key={stage} value={stage}>
@@ -206,13 +209,12 @@ export function CompanyFormModal({
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Investment Date
                 </label>
-                <input
+                <Input
                   type="date"
                   value={formData.investedAt}
                   onChange={(e) =>
                     setFormData({ ...formData, investedAt: e.target.value })
                   }
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 />
               </div>
             </div>
@@ -228,7 +230,7 @@ export function CompanyFormModal({
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Amount Invested ($)
                 </label>
-                <input
+                <Input
                   type="number"
                   value={formData.amountInvested}
                   onChange={(e) =>
@@ -237,7 +239,6 @@ export function CompanyFormModal({
                       amountInvested: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   min="0"
                   step="1000"
                 />
@@ -246,7 +247,7 @@ export function CompanyFormModal({
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Current Valuation ($)
                 </label>
-                <input
+                <Input
                   type="number"
                   value={formData.currentValuation}
                   onChange={(e) =>
@@ -255,7 +256,6 @@ export function CompanyFormModal({
                       currentValuation: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   min="0"
                   step="1000"
                 />
@@ -273,7 +273,7 @@ export function CompanyFormModal({
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Cash Remaining ($)
                 </label>
-                <input
+                <Input
                   type="number"
                   value={formData.cashRemaining}
                   onChange={(e) =>
@@ -282,7 +282,6 @@ export function CompanyFormModal({
                       cashRemaining: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   min="0"
                   step="1000"
                 />
@@ -291,7 +290,7 @@ export function CompanyFormModal({
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Monthly Burn Rate ($)
                 </label>
-                <input
+                <Input
                   type="number"
                   value={formData.monthlyBurnRate}
                   onChange={(e) =>
@@ -300,7 +299,6 @@ export function CompanyFormModal({
                       monthlyBurnRate: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   min="0"
                   step="1000"
                 />
@@ -309,7 +307,7 @@ export function CompanyFormModal({
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Monthly Revenue ($)
                 </label>
-                <input
+                <Input
                   type="number"
                   value={formData.monthlyRevenue}
                   onChange={(e) =>
@@ -318,7 +316,6 @@ export function CompanyFormModal({
                       monthlyRevenue: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   min="0"
                   step="1000"
                 />
@@ -328,24 +325,16 @@ export function CompanyFormModal({
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-            >
+            <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            </Button>
+            <Button type="submit" variant="primary" isLoading={loading}>
               {loading
                 ? "Saving..."
                 : mode === "create"
                 ? "Add Company"
                 : "Save Changes"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

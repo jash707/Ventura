@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Deal, DealStage } from "@/lib/types";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface AddDealModalProps {
   isOpen: boolean;
@@ -175,18 +177,20 @@ export function AddDealModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800">
         {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
             Add New Deal
           </h2>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            className="h-8 w-8 p-0"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Form */}
@@ -209,37 +213,27 @@ export function AddDealModal({
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Company Name *
                 </label>
-                <input
+                <Input
                   type="text"
                   name="companyName"
                   value={formData.companyName}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  error={errors.companyName}
                 />
-                {errors.companyName && (
-                  <p className="text-red-600 dark:text-red-400 text-xs mt-1">
-                    {errors.companyName}
-                  </p>
-                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Sector *
                 </label>
-                <input
+                <Input
                   type="text"
                   name="sector"
                   value={formData.sector}
                   onChange={handleChange}
                   placeholder="e.g., AI/ML, FinTech, SaaS"
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  error={errors.sector}
                 />
-                {errors.sector && (
-                  <p className="text-red-600 dark:text-red-400 text-xs mt-1">
-                    {errors.sector}
-                  </p>
-                )}
               </div>
             </div>
           </div>
@@ -255,40 +249,30 @@ export function AddDealModal({
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Requested Amount ($) *
                 </label>
-                <input
+                <Input
                   type="number"
                   name="requestedAmount"
                   value={formData.requestedAmount}
                   onChange={handleChange}
                   min="0"
                   step="1000"
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  error={errors.requestedAmount}
                 />
-                {errors.requestedAmount && (
-                  <p className="text-red-600 dark:text-red-400 text-xs mt-1">
-                    {errors.requestedAmount}
-                  </p>
-                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Valuation ($) *
                 </label>
-                <input
+                <Input
                   type="number"
                   name="valuation"
                   value={formData.valuation}
                   onChange={handleChange}
                   min="0"
                   step="1000"
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  error={errors.valuation}
                 />
-                {errors.valuation && (
-                  <p className="text-red-600 dark:text-red-400 text-xs mt-1">
-                    {errors.valuation}
-                  </p>
-                )}
               </div>
 
               <div>
@@ -299,7 +283,7 @@ export function AddDealModal({
                   name="roundStage"
                   value={formData.roundStage}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:focus:ring-indigo-400"
                 >
                   <option value="Pre-Seed">Pre-Seed</option>
                   <option value="Seed">Seed</option>
@@ -336,9 +320,9 @@ export function AddDealModal({
                     onChange={handleChange}
                     min="1"
                     max="10"
-                    className="w-full"
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-indigo-600"
                   />
-                  <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                  <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
                     <span>1</span>
                     <span className="font-semibold text-slate-900 dark:text-white">
                       {formData[score.name as keyof typeof formData]}
@@ -361,12 +345,11 @@ export function AddDealModal({
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Founder Name
                 </label>
-                <input
+                <Input
                   type="text"
                   name="founderName"
                   value={formData.founderName}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -374,18 +357,13 @@ export function AddDealModal({
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Founder Email *
                 </label>
-                <input
+                <Input
                   type="email"
                   name="founderEmail"
                   value={formData.founderEmail}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  error={errors.founderEmail}
                 />
-                {errors.founderEmail && (
-                  <p className="text-red-600 dark:text-red-400 text-xs mt-1">
-                    {errors.founderEmail}
-                  </p>
-                )}
               </div>
             </div>
           </div>
@@ -401,26 +379,28 @@ export function AddDealModal({
               onChange={handleChange}
               rows={3}
               placeholder="Additional notes about this deal..."
-              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="flex w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:focus:ring-indigo-400 resize-none"
             />
           </div>
 
           {/* Actions */}
           <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              className="flex-1"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/20"
+              variant="primary"
+              className="flex-1"
+              isLoading={isSubmitting}
             >
               {isSubmitting ? "Creating..." : "Create Deal"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

@@ -7,6 +7,9 @@ import {
   createMonthlyUpdate,
   deleteMonthlyUpdate,
 } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Calendar, Plus, Trash2, TrendingUp, TrendingDown } from "lucide-react";
 
 interface UpdatesSectionProps {
@@ -149,13 +152,13 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
           <Calendar className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
           Monthly Updates
         </h2>
-        <button
+        <Button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white border-transparent"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 mr-2" />
           {showForm ? "Cancel" : "Add Update"}
-        </button>
+        </Button>
       </div>
 
       {error && (
@@ -175,7 +178,7 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
               <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">
                 Report Month
               </label>
-              <input
+              <Input
                 type="month"
                 value={formData.reportMonth.slice(0, 7)}
                 max={maxSelectableMonth}
@@ -185,7 +188,6 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
                     reportMonth: e.target.value + "-01T00:00:00Z",
                   })
                 }
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 required
               />
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -197,7 +199,7 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
               <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">
                 MRR ($)
               </label>
-              <input
+              <Input
                 type="number"
                 value={formData.mrr}
                 onChange={(e) =>
@@ -206,7 +208,6 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
                     mrr: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 min="0"
                 step="0.01"
                 required
@@ -217,7 +218,7 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
               <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">
                 ARR ($)
               </label>
-              <input
+              <Input
                 type="number"
                 value={formData.arr}
                 onChange={(e) =>
@@ -226,7 +227,6 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
                     arr: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 min="0"
                 step="0.01"
                 required
@@ -237,7 +237,7 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
               <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">
                 Cash in Bank ($)
               </label>
-              <input
+              <Input
                 type="number"
                 value={formData.cashInBank}
                 onChange={(e) =>
@@ -246,7 +246,6 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
                     cashInBank: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 min="0"
                 step="0.01"
                 required
@@ -257,7 +256,7 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
               <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">
                 Burn Rate ($)
               </label>
-              <input
+              <Input
                 type="number"
                 value={formData.burnRate}
                 onChange={(e) =>
@@ -266,7 +265,6 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
                     burnRate: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 min="0"
                 step="0.01"
                 required
@@ -277,7 +275,7 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
               <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">
                 New Customers
               </label>
-              <input
+              <Input
                 type="number"
                 value={formData.newCustomers || 0}
                 onChange={(e) =>
@@ -286,7 +284,6 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
                     newCustomers: parseInt(e.target.value) || 0,
                   })
                 }
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 min="0"
               />
             </div>
@@ -295,7 +292,7 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
               <label className="block text-sm text-slate-600 dark:text-slate-400 mb-1">
                 Churn Rate (%)
               </label>
-              <input
+              <Input
                 type="number"
                 value={formData.churnRate || 0}
                 onChange={(e) =>
@@ -304,7 +301,6 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
                     churnRate: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 min="0"
                 max="100"
                 step="0.1"
@@ -328,20 +324,20 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
           </div>
 
           <div className="flex gap-3 justify-end">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-sm"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={submitting}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50"
+              isLoading={submitting}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white border-transparent"
             >
               {submitting ? "Submitting..." : "Submit Update"}
-            </button>
+            </Button>
           </div>
         </form>
       )}
@@ -353,12 +349,13 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
           <p className="text-slate-500 dark:text-slate-400">
             No monthly updates yet
           </p>
-          <button
+          <Button
+            variant="ghost"
             onClick={() => setShowForm(true)}
-            className="mt-3 text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-medium"
+            className="mt-3 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
           >
             Submit the first monthly report
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="space-y-4">
@@ -373,18 +370,23 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
                     {formatDate(update.reportMonth)}
                   </span>
                   {index === 0 && (
-                    <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                    <Badge
+                      className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-transparent hover:bg-emerald-100 hover:text-emerald-700"
+                      variant="outline"
+                    >
                       Latest
-                    </span>
+                    </Badge>
                   )}
                 </div>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => handleDelete(update.id)}
-                  className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
+                  className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/30"
                   title="Delete update"
                 >
                   <Trash2 className="h-4 w-4 text-red-500 dark:text-red-400" />
-                </button>
+                </Button>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">

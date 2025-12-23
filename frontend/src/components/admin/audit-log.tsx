@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
 
 export function AuditLogView() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -130,7 +132,7 @@ export function AuditLogView() {
       {/* Loading State */}
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+          <Spinner size="md" />
         </div>
       )}
 
@@ -143,7 +145,7 @@ export function AuditLogView() {
 
       {/* Audit Log List */}
       {!loading && !error && (
-        <div className="bg-white/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
+        <div className="card-base overflow-hidden">
           <div className="divide-y divide-slate-200 dark:divide-slate-800">
             {logs.map((log) => (
               <div
@@ -212,20 +214,20 @@ export function AuditLogView() {
             of {total} entries
           </div>
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="secondary"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 dark:text-white rounded-lg transition-colors"
             >
               Previous
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-slate-700 dark:text-white rounded-lg transition-colors"
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}

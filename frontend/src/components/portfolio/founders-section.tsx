@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Founder, CreateFounderData } from "@/lib/types";
 import { createFounder, updateFounder, deleteFounder } from "@/lib/api";
 import { FounderFormModal } from "./founder-form-modal";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Users, Plus, Edit2, Trash2, Linkedin, Mail } from "lucide-react";
 
 interface FoundersSectionProps {
@@ -77,6 +79,10 @@ export function FoundersSection({
     );
   };
 
+  // ... existing imports
+
+  // ...
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 transition-colors">
       {/* Header */}
@@ -85,13 +91,13 @@ export function FoundersSection({
           <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
           Team & Founders
         </h2>
-        <button
+        <Button
           onClick={openCreateModal}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
+          className="bg-purple-600 hover:bg-purple-700 text-white border-transparent"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 mr-2" />
           Add Founder
-        </button>
+        </Button>
       </div>
 
       {/* Founders List */}
@@ -101,12 +107,13 @@ export function FoundersSection({
           <p className="text-slate-500 dark:text-slate-400">
             No founders added yet
           </p>
-          <button
+          <Button
+            variant="ghost"
             onClick={openCreateModal}
-            className="mt-3 text-purple-600 dark:text-purple-400 hover:underline text-sm font-medium"
+            className="mt-3 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
           >
             Add the first founder
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -121,13 +128,12 @@ export function FoundersSection({
                     <h3 className="font-semibold text-slate-900 dark:text-white">
                       {founder.name}
                     </h3>
-                    <span
-                      className={`px-2 py-0.5 text-xs font-medium rounded-full ${getRoleBadgeColor(
-                        founder.role
-                      )}`}
+                    <Badge
+                      className={`text-xs ${getRoleBadgeColor(founder.role)}`}
+                      variant="outline"
                     >
                       {founder.role}
-                    </span>
+                    </Badge>
                   </div>
                   <div className="flex items-center gap-4 mt-2">
                     <a
@@ -151,21 +157,29 @@ export function FoundersSection({
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => openEditModal(founder)}
-                    className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+                    className="h-8 w-8 p-0"
                     title="Edit founder"
                   >
                     <Edit2 className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleDelete(founder.id)}
                     disabled={deleteLoading === founder.id}
-                    className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors disabled:opacity-50"
+                    className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/30"
                     title="Remove founder"
                   >
-                    <Trash2 className="h-4 w-4 text-red-500 dark:text-red-400" />
-                  </button>
+                    {deleteLoading === founder.id ? (
+                      <div className="h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 text-red-500 dark:text-red-400" />
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>

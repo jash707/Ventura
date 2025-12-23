@@ -27,7 +27,7 @@ export function AUMCard({
   };
 
   return (
-    <Card className="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 border-slate-200 dark:border-slate-700 transition-colors">
+    <Card className="p-6 card-base">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 transition-colors">
           Total AUM

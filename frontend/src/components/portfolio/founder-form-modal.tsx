@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { CreateFounderData, Founder } from "@/lib/types";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface FounderFormModalProps {
   isOpen: boolean;
@@ -80,12 +82,14 @@ export function FounderFormModal({
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
             {mode === "create" ? "Add Founder" : "Edit Founder"}
           </h2>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            className="h-8 w-8 p-0"
           >
             <X className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-          </button>
+          </Button>
         </div>
 
         {/* Error */}
@@ -102,13 +106,13 @@ export function FounderFormModal({
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
               Name *
             </label>
-            <input
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-4 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               placeholder="John Doe"
+              className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 placeholder-slate-400"
             />
           </div>
 
@@ -117,13 +121,13 @@ export function FounderFormModal({
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
               Email *
             </label>
-            <input
+            <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               placeholder="john@company.com"
+              className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 placeholder-slate-400"
             />
           </div>
 
@@ -136,7 +140,7 @@ export function FounderFormModal({
               value={role}
               onChange={(e) => setRole(e.target.value)}
               required
-              className="w-full px-4 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              className="flex h-10 w-full rounded-md border border-slate-300 bg-slate-100 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             >
               {ROLE_OPTIONS.map((r) => (
                 <option key={r} value={r}>
@@ -151,35 +155,37 @@ export function FounderFormModal({
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
               LinkedIn URL
             </label>
-            <input
+            <Input
               type="url"
               value={linkedInUrl}
               onChange={(e) => setLinkedInUrl(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               placeholder="https://linkedin.com/in/johndoe"
+              className="bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 placeholder-slate-400"
             />
           </div>
 
           {/* Buttons */}
           <div className="flex gap-3 pt-4">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors font-medium"
+              className="flex-1"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={loading}
-              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50"
+              variant="primary"
+              isLoading={loading}
+              className="flex-1"
             >
               {loading
                 ? "Saving..."
                 : mode === "create"
                 ? "Add Founder"
                 : "Save Changes"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

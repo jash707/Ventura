@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MissingUpdateInfo } from "@/lib/types";
 import { fetchMissingUpdates, toggleCompanyNotifications } from "@/lib/api";
 import { AlertTriangle, X, BellOff, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function MissingUpdatesAlert() {
   const [companies, setCompanies] = useState<MissingUpdateInfo[]>([]);
@@ -50,7 +51,7 @@ export default function MissingUpdatesAlert() {
   return (
     <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
       <div className="flex items-start gap-3">
-        <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+        <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
         <div className="flex-1">
           <h3 className="font-semibold text-amber-800 dark:text-amber-300 mb-2">
             Missing Monthly Updates
@@ -86,32 +87,36 @@ export default function MissingUpdatesAlert() {
                     </span>
                   )}
                 </div>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => handleDismiss(company.id)}
                   disabled={dismissing === company.id}
-                  className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 disabled:opacity-50"
+                  className="flex items-center gap-1 text-xs px-2 h-7"
                   title="Disable notifications for this company"
                 >
                   {dismissing === company.id ? (
                     "..."
                   ) : (
                     <>
-                      <BellOff className="h-3.5 w-3.5" />
+                      <BellOff className="h-3.5 w-3.5 mr-1" />
                       Dismiss
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             ))}
           </div>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setCompanies([])}
-          className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300"
+          className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 p-1 h-auto"
           title="Dismiss all"
         >
           <X className="h-5 w-5" />
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { inviteUser } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface InviteModalProps {
   onClose: () => void;
@@ -83,12 +85,9 @@ export function InviteModal({ onClose, onSuccess }: InviteModalProps) {
                 </div>
               </div>
             </div>
-            <button
-              onClick={onSuccess}
-              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors shadow-lg shadow-indigo-500/20"
-            >
+            <Button variant="primary" className="w-full" onClick={onSuccess}>
               Done
-            </button>
+            </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -102,12 +101,11 @@ export function InviteModal({ onClose, onSuccess }: InviteModalProps) {
               <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">
                 Email
               </label>
-              <input
+              <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                 placeholder="user@example.com"
               />
             </div>
@@ -116,12 +114,11 @@ export function InviteModal({ onClose, onSuccess }: InviteModalProps) {
               <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">
                 Name
               </label>
-              <input
+              <Input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                 placeholder="John Doe"
               />
             </div>
@@ -186,23 +183,22 @@ export function InviteModal({ onClose, onSuccess }: InviteModalProps) {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                className="flex-1"
                 onClick={onClose}
-                className="flex-1 py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-lg transition-colors"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                disabled={loading}
-                className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
+                variant="primary"
+                className="flex-1 gap-2"
+                isLoading={loading}
               >
-                {loading && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
-                )}
-                {loading ? "Inviting..." : "Invite User"}
-              </button>
+                {!loading && "Invite User"}
+              </Button>
             </div>
           </form>
         )}

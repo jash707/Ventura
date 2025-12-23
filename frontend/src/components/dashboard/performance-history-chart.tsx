@@ -88,7 +88,7 @@ export function PerformanceHistoryChart({
   };
 
   return (
-    <Card className="p-6 bg-card border-border">
+    <Card className="p-6 card-base">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-card-foreground">
           Portfolio Performance Over Time

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { UserWithDetails } from "@/lib/types";
 import { fetchUsers, updateUser, deleteUser } from "@/lib/api";
@@ -10,6 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 export function UserList() {
   const [users, setUsers] = useState<UserWithDetails[]>([]);
@@ -65,7 +66,7 @@ export function UserList() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+        <Spinner size="md" />
       </div>
     );
   }
@@ -79,23 +80,15 @@ export function UserList() {
   }
 
   return (
-    <div className="bg-white/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
+    <div className="card-base overflow-hidden">
       <table className="w-full">
         <thead className="bg-slate-100/80 dark:bg-slate-800/50 transition-colors">
           <tr>
-            <th className="px-6 py-4 text-left text-sm font-medium text-slate-500 dark:text-slate-400">
-              Name
-            </th>
-            <th className="px-6 py-4 text-left text-sm font-medium text-slate-500 dark:text-slate-400">
-              Email
-            </th>
-            <th className="px-6 py-4 text-left text-sm font-medium text-slate-500 dark:text-slate-400">
-              Role
-            </th>
-            <th className="px-6 py-4 text-left text-sm font-medium text-slate-500 dark:text-slate-400">
-              Joined
-            </th>
-            <th className="px-6 py-4 text-right text-sm font-medium text-slate-500 dark:text-slate-400">
+            <th className="table-header">Name</th>
+            <th className="table-header">Email</th>
+            <th className="table-header">Role</th>
+            <th className="table-header">Joined</th>
+            <th className="bg-white/50 px-6 py-4 text-right text-sm font-medium text-slate-500 dark:text-slate-400">
               Actions
             </th>
           </tr>
@@ -108,11 +101,10 @@ export function UserList() {
             >
               <td className="px-6 py-4">
                 {editingId === user.id ? (
-                  <input
+                  <Input
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded px-3 py-1.5 text-slate-900 dark:text-white w-full transition-colors"
                   />
                 ) : (
                   <span className="text-slate-900 dark:text-white font-medium">
@@ -141,11 +133,9 @@ export function UserList() {
                   </Select>
                 ) : (
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      user.role === "admin"
-                        ? "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300"
-                        : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
-                    }`}
+                    className={
+                      user.role === "admin" ? "badge-admin" : "badge-viewer"
+                    }
                   >
                     {user.role}
                   </span>
@@ -157,33 +147,40 @@ export function UserList() {
               <td className="px-6 py-4 text-right">
                 {editingId === user.id ? (
                   <div className="flex gap-2 justify-end">
-                    <button
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      className="bg-green-600 hover:bg-green-700 focus:ring-green-500 shadow-green-500/20"
                       onClick={() => handleSave(user.id)}
-                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
                     >
                       Save
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
                       onClick={() => setEditingId(null)}
-                      className="px-3 py-1.5 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 text-slate-700 dark:text-white text-sm rounded transition-colors"
                     >
                       Cancel
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <div className="flex gap-2 justify-end">
-                    <button
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="bg-indigo-100 dark:bg-indigo-600/20 hover:bg-indigo-200 dark:hover:bg-indigo-600/40 text-indigo-600 dark:text-indigo-400"
                       onClick={() => handleEdit(user)}
-                      className="px-3 py-1.5 bg-indigo-100 dark:bg-indigo-600/20 hover:bg-indigo-200 dark:hover:bg-indigo-600/40 text-indigo-600 dark:text-indigo-400 text-sm rounded transition-colors"
                     >
                       Edit
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="bg-red-100 dark:bg-red-600/20 hover:bg-red-200 dark:hover:bg-red-600/40 text-red-600 dark:text-red-400"
                       onClick={() => handleDelete(user.id, user.email)}
-                      className="px-3 py-1.5 bg-red-100 dark:bg-red-600/20 hover:bg-red-200 dark:hover:bg-red-600/40 text-red-600 dark:text-red-400 text-sm rounded transition-colors"
                     >
                       Delete
-                    </button>
+                    </Button>
                   </div>
                 )}
               </td>
