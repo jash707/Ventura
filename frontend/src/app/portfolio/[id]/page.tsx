@@ -156,7 +156,7 @@ export default function CompanyDetailPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors">
         {/* Toast Notification */}
         {toast && (
           <div
@@ -282,7 +282,7 @@ export default function CompanyDetailPage() {
                               : "Notifications disabled",
                             "success"
                           );
-                        } catch (err) {
+                        } catch {
                           showToast("Failed to toggle notifications", "error");
                         } finally {
                           setNotificationsToggling(false);
@@ -463,11 +463,11 @@ export default function CompanyDetailPage() {
                 onFoundersChange={loadFounders}
               />
 
-              {/* Team Assignments Section */}
-              <TeamSection companyId={company.id} companyName={company.name} />
-
               {/* Monthly Updates Section */}
               <UpdatesSection companyId={company.id} />
+
+              {/* Internal Team Assignments Section */}
+              <TeamSection companyId={company.id} companyName={company.name} />
             </div>
           )}
         </div>

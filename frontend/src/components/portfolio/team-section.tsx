@@ -12,6 +12,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus } from "lucide-react";
 
 interface TeamSectionProps {
@@ -112,7 +119,7 @@ export function TeamSection({ companyId, companyName }: TeamSectionProps) {
 
   if (loading) {
     return (
-      <div className="bg-white/50 dark:bg-gray-900/50 rounded-xl border border-slate-200 dark:border-gray-800 p-6 transition-colors">
+      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 transition-colors">
         <div className="flex justify-center py-4">
           <Spinner />
         </div>
@@ -121,7 +128,7 @@ export function TeamSection({ companyId, companyName }: TeamSectionProps) {
   }
 
   return (
-    <div className="bg-white/50 dark:bg-gray-900/50 rounded-xl border border-slate-200 dark:border-gray-800 p-6 transition-colors">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 transition-colors">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
           <svg
@@ -132,16 +139,16 @@ export function TeamSection({ companyId, companyName }: TeamSectionProps) {
           >
             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
           </svg>
-          Team Members
+          Internal Team Assignments
         </h3>
         {isAdmin && (
           <Button
             size="sm"
             onClick={handleOpenAddModal}
-            className="bg-indigo-100 dark:bg-indigo-600/20 hover:bg-indigo-200 dark:hover:bg-indigo-600/40 text-indigo-600 dark:text-indigo-400 border-transparent shadow-none"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white border-transparent"
           >
             <Plus className="h-4 w-4 mr-1" />
-            Add Member
+            Assign
           </Button>
         )}
       </div>
@@ -168,7 +175,7 @@ export function TeamSection({ companyId, companyName }: TeamSectionProps) {
               d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
             />
           </svg>
-          No team members assigned
+          No internal team members assigned to this company
         </div>
       ) : (
         <div className="space-y-3">
@@ -237,37 +244,42 @@ export function TeamSection({ companyId, companyName }: TeamSectionProps) {
                 <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-1">
                   Select User
                 </label>
-                <select
-                  value={selectedUserId || ""}
-                  onChange={(e) =>
-                    setSelectedUserId(
-                      e.target.value ? Number(e.target.value) : null
-                    )
+                <Select
+                  value={selectedUserId ? String(selectedUserId) : ""}
+                  onValueChange={(value) =>
+                    setSelectedUserId(value ? Number(value) : null)
                   }
-                  className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-300 dark:border-gray-700 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white"
                 >
-                  <option value="">Choose a user...</option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name} ({u.email})
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose a user..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((u) => (
+                      <SelectItem key={u.id} value={String(u.id)}>
+                        {u.name} ({u.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-1">
                   Role
                 </label>
-                <select
+                <Select
                   value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value as TeamRole)}
-                  className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-300 dark:border-gray-700 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white"
+                  onValueChange={(value) => setSelectedRole(value as TeamRole)}
                 >
-                  <option value="lead">Lead</option>
-                  <option value="analyst">Analyst</option>
-                  <option value="observer">Observer</option>
-                </select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lead">Lead</SelectItem>
+                    <SelectItem value="analyst">Analyst</SelectItem>
+                    <SelectItem value="observer">Observer</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex gap-3 pt-2">
