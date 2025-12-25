@@ -84,13 +84,13 @@ export default function AdminPage() {
 
       {/* Tab Navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex gap-1 bg-slate-200/50 dark:bg-slate-900/50 p-1 rounded-lg w-fit transition-colors">
+        <div className="flex gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg w-fit border border-slate-200 dark:border-slate-700 transition-colors">
           <button
             onClick={() => setActiveTab("users")}
             className={`px-6 py-2.5 rounded-md font-medium transition-all ${
               activeTab === "users"
-                ? "bg-indigo-600 text-white shadow-lg"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300/50 dark:hover:bg-slate-800/50"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60"
             }`}
           >
             <span className="flex items-center gap-2">
@@ -109,8 +109,8 @@ export default function AdminPage() {
             onClick={() => setActiveTab("audit")}
             className={`px-6 py-2.5 rounded-md font-medium transition-all ${
               activeTab === "audit"
-                ? "bg-indigo-600 text-white shadow-lg"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-300/50 dark:hover:bg-slate-800/50"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
+                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60"
             }`}
           >
             <span className="flex items-center gap-2">

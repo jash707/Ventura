@@ -88,9 +88,7 @@ export function UserList() {
             <th className="table-header">Email</th>
             <th className="table-header">Role</th>
             <th className="table-header">Joined</th>
-            <th className="bg-white/50 px-6 py-4 text-right text-sm font-medium text-slate-500 dark:text-slate-400">
-              Actions
-            </th>
+            <th className="table-header text-right">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
