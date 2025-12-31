@@ -10,10 +10,10 @@ import {
   ArrowUp,
   ArrowDown,
   Search,
-  DollarSign,
   Edit2,
   Trash2,
 } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface CompaniesTableProps {
   companies: PortfolioCompany[];
@@ -53,17 +53,7 @@ export function CompaniesTable({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-
-  // Format currency
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-      notation: "compact",
-    }).format(value);
-  };
+  const { formatCurrency } = useCurrency();
 
   // Get health badge styling
   const getHealthBadge = (status: string) => {
@@ -232,8 +222,7 @@ export function CompaniesTable({
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center text-slate-900 dark:text-white">
-                          <DollarSign className="h-4 w-4 mr-1 text-muted-foreground" />
+                        <div className="text-slate-900 dark:text-white">
                           {formatCurrency(company.amountInvested)}
                         </div>
                       </td>

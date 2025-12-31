@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { PortfolioHistoryPoint } from "@/lib/api";
 import { useTheme } from "next-themes";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface PerformanceHistoryChartProps {
   data: PortfolioHistoryPoint[];
@@ -30,16 +31,7 @@ const CustomTooltip = ({
   const { theme, systemTheme } = useTheme();
   const currentTheme = theme === "system" ? systemTheme : theme;
   const isDark = currentTheme === "dark";
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-      notation: "compact",
-    }).format(value);
-  };
+  const { formatCurrency } = useCurrency();
 
   if (active && payload && payload.length) {
     return (
@@ -68,24 +60,17 @@ export function PerformanceHistoryChart({
   const { theme, systemTheme } = useTheme();
   const currentTheme = theme === "system" ? systemTheme : theme;
   const isDark = currentTheme === "dark";
+  const { formatCompact, convertAmount } = useCurrency();
 
-  // Format data for chart
+  // Format data for chart with currency conversion
   const chartData = data.map((point) => ({
     date: point.date,
-    invested: parseFloat(point.totalInvested),
-    value: parseFloat(point.currentValue),
+    invested: convertAmount(parseFloat(point.totalInvested)),
+    value: convertAmount(parseFloat(point.currentValue)),
     companies: point.companyCount,
   }));
 
-  const formatYAxis = (value: number) => {
-    if (value >= 1000000) {
-      return `$${(value / 1000000).toFixed(0)}M`;
-    }
-    if (value >= 1000) {
-      return `$${(value / 1000).toFixed(0)}K`;
-    }
-    return `$${value}`;
-  };
+  const formatYAxis = (value: number) => formatCompact(value);
 
   return (
     <Card className="p-6 card-base">

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Calendar, Plus, Trash2, TrendingUp, TrendingDown } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface UpdatesSectionProps {
   companyId: number;
@@ -22,6 +23,7 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const { formatCurrency } = useCurrency();
 
   // Get the last completed month (previous month)
   const getLastCompletedMonth = useCallback(() => {
@@ -110,15 +112,6 @@ export default function UpdatesSection({ companyId }: UpdatesSectionProps) {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete update");
     }
-  };
-
-  const formatCurrency = (value: string | number) => {
-    const num = typeof value === "string" ? parseFloat(value) : value;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(num);
   };
 
   const formatDate = (dateString: string) => {

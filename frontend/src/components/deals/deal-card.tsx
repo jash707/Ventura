@@ -4,7 +4,8 @@ import { Deal } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Building2, DollarSign, Star } from "lucide-react";
+import { Building2, Star } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface DealCardProps {
   deal: Deal;
@@ -19,23 +20,12 @@ export function DealCard({ deal }: DealCardProps) {
     transition,
     isDragging,
   } = useSortable({ id: deal.id });
+  const { formatCurrency } = useCurrency();
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-  };
-
-  const formatCurrency = (value: string) => {
-    const num = parseFloat(value);
-    if (isNaN(num)) return value;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-      notation: "compact",
-    }).format(num);
   };
 
   const getScoreColor = (score: number) => {
@@ -73,7 +63,6 @@ export function DealCard({ deal }: DealCardProps) {
 
       {/*  Requested Amount */}
       <div className="flex items-center gap-2 mb-3 text-sm">
-        <DollarSign className="h-4 w-4 text-slate-500 dark:text-slate-400" />
         <span className="font-medium text-slate-900 dark:text-white">
           {formatCurrency(deal.requestedAmount)}
         </span>

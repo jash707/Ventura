@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { CompanyFormModal } from "@/components/portfolio/company-form-modal";
 import { DeleteConfirmDialog } from "@/components/portfolio/delete-confirm-dialog";
 import { FoundersSection } from "@/components/portfolio/founders-section";
@@ -37,6 +38,7 @@ export default function CompanyDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { formatCurrency } = useCurrency();
   const [company, setCompany] = useState<PortfolioCompany | null>(null);
   const [founders, setFounders] = useState<Founder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,15 +124,6 @@ export default function CompanyDetailPage() {
     } finally {
       setDeleteLoading(false);
     }
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
   };
 
   const getHealthBadge = (status: string) => {

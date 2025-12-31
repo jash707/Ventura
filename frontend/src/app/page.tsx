@@ -19,6 +19,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { CurrencySelector } from "@/components/CurrencySelector";
 import { Footer } from "@/components/Footer";
 
 export default function DashboardPage() {
@@ -116,6 +117,7 @@ export default function DashboardPage() {
                     {user?.email}
                   </p>
                 </div>
+                <CurrencySelector />
                 <ThemeToggle />
                 <button
                   onClick={handleLogout}

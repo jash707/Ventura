@@ -2,7 +2,8 @@
 
 import { Card } from "@/components/ui/card";
 import { InvestmentEvent } from "@/lib/api";
-import { Calendar, DollarSign, Building2 } from "lucide-react";
+import { Calendar, Building2 } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface InvestmentTimelineProps {
   data: InvestmentEvent[];
@@ -19,15 +20,7 @@ const SECTOR_COLORS: Record<string, string> = {
 };
 
 export function InvestmentTimeline({ data }: InvestmentTimelineProps) {
-  const formatCurrency = (value: string) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-      notation: "compact",
-    }).format(parseFloat(value));
-  };
+  const { formatCurrency } = useCurrency();
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -114,8 +107,7 @@ export function InvestmentTimeline({ data }: InvestmentTimelineProps) {
                       <span className="text-muted-foreground">
                         {formatDate(event.date)}
                       </span>
-                      <div className="shrink-0 w-24 text-sm text-slate-500 dark:text-slate-400">
-                        <DollarSign className="h-3 w-3" />
+                      <div className="shrink-0 w-28 text-sm text-slate-500 dark:text-slate-400">
                         {formatCurrency(event.amount)}
                       </div>
                       {event.roundStage && (

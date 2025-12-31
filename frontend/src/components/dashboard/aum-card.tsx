@@ -2,6 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { TrendingUp, DollarSign, TrendingDown } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface AUMCardProps {
   totalDeployed: number;
@@ -16,15 +17,7 @@ export function AUMCard({
 }: AUMCardProps) {
   const returnPercentage = ((unrealizedGains / totalDeployed) * 100).toFixed(1);
   const isPositive = unrealizedGains >= 0;
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
+  const { formatCurrency } = useCurrency();
 
   return (
     <Card className="p-6 card-base">

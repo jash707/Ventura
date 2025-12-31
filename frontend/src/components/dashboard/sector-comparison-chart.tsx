@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { SectorComparisonData } from "@/lib/api";
 import { useTheme } from "next-themes";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface SectorComparisonChartProps {
   data: SectorComparisonData[];
@@ -46,16 +47,7 @@ const CustomTooltip = ({
   const { theme, systemTheme } = useTheme();
   const currentTheme = theme === "system" ? systemTheme : theme;
   const isDark = currentTheme === "dark";
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-      notation: "compact",
-    }).format(value);
-  };
+  const { formatCurrency } = useCurrency();
 
   if (active && payload && payload.length) {
     const data = payload[0].payload;
@@ -88,27 +80,20 @@ export function SectorComparisonChart({ data }: SectorComparisonChartProps) {
   const { theme, systemTheme } = useTheme();
   const currentTheme = theme === "system" ? systemTheme : theme;
   const isDark = currentTheme === "dark";
+  const { formatCompact, convertAmount } = useCurrency();
 
-  // Format data for chart
+  // Format data for chart with currency conversion
   const chartData = data
     .map((item) => ({
       sector: item.sector,
-      invested: parseFloat(item.totalInvested),
-      value: parseFloat(item.currentValue),
+      invested: convertAmount(parseFloat(item.totalInvested)),
+      value: convertAmount(parseFloat(item.currentValue)),
       moic: parseFloat(item.moic),
       companies: item.companyCount,
     }))
     .sort((a, b) => b.value - a.value);
 
-  const formatXAxis = (value: number) => {
-    if (value >= 1000000) {
-      return `$${(value / 1000000).toFixed(0)}M`;
-    }
-    if (value >= 1000) {
-      return `$${(value / 1000).toFixed(0)}K`;
-    }
-    return `$${value}`;
-  };
+  const formatXAxis = (value: number) => formatCompact(value);
 
   return (
     <Card className="p-6 bg-card border-border">

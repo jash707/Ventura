@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { SectorAllocation } from "@/lib/types";
 import { useTheme } from "next-themes";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface SectorAllocationProps {
   sectors: SectorAllocation[];
@@ -20,6 +21,7 @@ const CustomTooltip = ({
   const { theme, systemTheme } = useTheme();
   const currentTheme = theme === "system" ? systemTheme : theme;
   const isDark = currentTheme === "dark";
+  const { formatCurrency } = useCurrency();
 
   if (active && payload && payload.length) {
     return (
@@ -32,13 +34,7 @@ const CustomTooltip = ({
       >
         <p className="font-medium">{payload[0].name}</p>
         <p className={isDark ? "text-emerald-400" : "text-emerald-600"}>
-          {new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-            notation: "compact",
-          }).format(payload[0].value)}
+          {formatCurrency(payload[0].value)}
         </p>
       </div>
     );
@@ -47,15 +43,7 @@ const CustomTooltip = ({
 };
 
 export function SectorAllocationCard({ sectors }: SectorAllocationProps) {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-      notation: "compact",
-    }).format(value);
-  };
+  const { formatCurrency } = useCurrency();
 
   return (
     <Card className="p-6 bg-card border-border">
