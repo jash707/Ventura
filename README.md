@@ -4,12 +4,14 @@ A comprehensive venture capital investment dashboard built with **Go** (Gin) bac
 
 ## Features
 
-### 🔐 Authentication
+### 🔐 Authentication & User Management
 
 - JWT-based authentication with access and refresh tokens
 - Secure HTTP-only cookies for token storage
 - User registration and login
 - Role-based access (Admin, Editor, Viewer)
+- Admin panel for user management and audit logs
+- User invitation system with email-based onboarding
 
 ### 📊 Dashboard Analytics
 
@@ -23,7 +25,10 @@ A comprehensive venture capital investment dashboard built with **Go** (Gin) bac
 
 - Full CRUD operations for portfolio companies
 - Financial metrics tracking (cash remaining, burn rate, monthly revenue)
-- Automatic health status calculation
+- Automatic health status and runway calculation
+- **Founder Management**: Track founder profiles with contact info and LinkedIn
+- **Monthly Updates**: Companies submit MRR, ARR, cash, burn rate, and churn metrics
+- **Team Assignments**: Assign internal team members to portfolio companies
 - Company detail pages with comprehensive metrics
 
 ### 📈 Deal Flow Management
@@ -31,19 +36,35 @@ A comprehensive venture capital investment dashboard built with **Go** (Gin) bac
 - Kanban-style pipeline with drag-and-drop
 - Deal stages: Sourcing → Screening → Due Diligence → Negotiation → Closed
 - Deal scoring (team, product, market, traction)
+- **Auto-Portfolio Creation**: Closed deals automatically create portfolio companies
 - Deal creation and stage management
+
+### 💱 Multi-Currency Support
+
+- **11 Supported Currencies**: USD, INR, EUR, GBP, AED, JPY, CAD, AUD, CHF, SGD, CNY
+- Live exchange rate fetching from ExchangeRate API
+- Currency preference persistence
+- Dynamic conversion across all monetary displays
+
+### 🎨 UI/UX
+
+- **Dark/Light Mode**: System-aware theme with manual toggle
+- Responsive design for all screen sizes
+- Modern UI with Tailwind CSS, glassmorphism effects
+- Interactive charts with Recharts
 
 ## Tech Stack
 
-| Layer    | Technology              |
-| -------- | ----------------------- |
-| Backend  | Go (Gin Framework)      |
-| Frontend | Next.js 14 (App Router) |
-| Database | PostgreSQL (via Docker) |
-| ORM      | GORM                    |
-| Styling  | Tailwind CSS            |
-| Charts   | Recharts                |
-| Auth     | JWT (golang-jwt)        |
+| Layer     | Technology               |
+| --------- | ------------------------ |
+| Backend   | Go (Gin Framework)       |
+| Frontend  | Next.js 16 (App Router)  |
+| Database  | PostgreSQL (Neon/Docker) |
+| ORM       | GORM                     |
+| Styling   | Tailwind CSS v4          |
+| Charts    | Recharts                 |
+| Auth      | JWT (golang-jwt)         |
+| Drag/Drop | dnd-kit                  |
 
 ## Project Structure
 
@@ -121,6 +142,41 @@ ventura/
 | GET    | `/deals?stage=X`   | Filter deals by stage      |
 | POST   | `/deals`           | Create a new deal          |
 | PUT    | `/deals/:id/stage` | Update deal pipeline stage |
+
+### Founders
+
+| Method | Endpoint                  | Description                 |
+| ------ | ------------------------- | --------------------------- |
+| GET    | `/portfolio/:id/founders` | List founders for a company |
+| POST   | `/portfolio/:id/founders` | Add a founder               |
+| PUT    | `/founders/:id`           | Update a founder            |
+| DELETE | `/founders/:id`           | Delete a founder            |
+
+### Monthly Updates
+
+| Method | Endpoint                         | Description                |
+| ------ | -------------------------------- | -------------------------- |
+| GET    | `/portfolio/:id/monthly-updates` | List updates for a company |
+| POST   | `/portfolio/:id/monthly-updates` | Create a monthly update    |
+| DELETE | `/monthly-updates/:id`           | Delete a monthly update    |
+
+### Team Assignments
+
+| Method | Endpoint                      | Description            |
+| ------ | ----------------------------- | ---------------------- |
+| GET    | `/portfolio/:id/team`         | List team assignments  |
+| POST   | `/portfolio/:id/team`         | Assign a team member   |
+| DELETE | `/portfolio/:id/team/:userId` | Remove team assignment |
+
+### Admin (Requires Admin Role)
+
+| Method | Endpoint             | Description          |
+| ------ | -------------------- | -------------------- |
+| GET    | `/admin/users`       | List all users       |
+| PUT    | `/admin/users/:id`   | Update user role     |
+| DELETE | `/admin/users/:id`   | Delete a user        |
+| POST   | `/admin/invitations` | Send user invitation |
+| GET    | `/admin/audit-logs`  | View audit logs      |
 
 ### Other
 
