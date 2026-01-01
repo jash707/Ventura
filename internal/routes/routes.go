@@ -49,6 +49,9 @@ func registerAPIRoutes(r *gin.Engine, c *di.Container) {
 	api := r.Group("/api")
 	api.Use(middleware.AuthMiddleware())
 	{
+		// Search endpoint
+		api.GET("/search", c.SearchHandler.GlobalSearch)
+
 		registerDashboardRoutes(api, c)
 		registerPortfolioRoutes(api, c)
 		registerDealRoutes(api, c)

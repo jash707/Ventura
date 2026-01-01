@@ -21,6 +21,7 @@ type Container struct {
 	UserHandler          *handler.UserHandler
 	AuditHandler         *handler.AuditHandler
 	TeamHandler          *handler.TeamHandler
+	SearchHandler        *handler.SearchHandler
 }
 
 // NewContainer creates and wires up all dependencies
@@ -51,5 +52,6 @@ func NewContainer(db *gorm.DB) *Container {
 		UserHandler:          handler.NewUserHandler(userRepo, auditLogRepo),
 		AuditHandler:         handler.NewAuditHandler(auditLogRepo),
 		TeamHandler:          handler.NewTeamHandler(teamAssignmentRepo, userRepo, portfolioRepo, auditLogRepo),
+		SearchHandler:        handler.NewSearchHandler(portfolioRepo, dealRepo, userRepo),
 	}
 }

@@ -21,6 +21,8 @@ import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Footer } from "@/components/Footer";
+import { CommandPalette, useCommandPalette } from "@/components/CommandPalette";
+import { Search } from "lucide-react";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -31,6 +33,11 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const { user, logout } = useAuth();
   const router = useRouter();
+  const {
+    isOpen: isSearchOpen,
+    open: openSearch,
+    close: closeSearch,
+  } = useCommandPalette();
 
   useEffect(() => {
     async function loadDashboard() {
@@ -77,6 +84,16 @@ export default function DashboardPage() {
                 </p>
               </div>
               <div className="flex items-center gap-4">
+                <button
+                  onClick={openSearch}
+                  className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg transition-colors text-sm border border-slate-200 dark:border-slate-700"
+                >
+                  <Search className="w-4 h-4" />
+                  <span className="hidden sm:inline">Search...</span>
+                  <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-[10px] font-mono">
+                    ⌘K
+                  </kbd>
+                </button>
                 <button
                   onClick={() => router.push("/portfolio")}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium shadow-lg shadow-blue-500/20"
@@ -231,6 +248,9 @@ export default function DashboardPage() {
 
         {/* Footer */}
         <Footer />
+
+        {/* Command Palette */}
+        <CommandPalette isOpen={isSearchOpen} onClose={closeSearch} />
       </div>
     </ProtectedRoute>
   );
