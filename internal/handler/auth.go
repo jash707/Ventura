@@ -13,6 +13,7 @@ import (
 	"ventura/internal/repository"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthHandler struct {
@@ -386,6 +387,124 @@ func (h *AuthHandler) GetInviteCodes(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, invites)
+}
+
+// UpdateProfileRequest represents the profile update request body
+type UpdateProfileRequest struct {
+	Name string `json:"name" binding:"required"`
+}
+
+// ChangePasswordRequest represents the password change request body
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"currentPassword" binding:"required"`
+	NewPassword     string `json:"newPassword" binding:"required,min=8"`
+}
+
+// UpdateProfile updates the current user's profile
+func (h *AuthHandler) UpdateProfile(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	var req UpdateProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := h.userRepo.FindByIDWithOrganization(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	// Update name
+	user.Name = req.Name
+
+	if err := h.userRepo.Update(user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+		return
+	}
+
+	orgName := ""
+	if user.Organization != nil {
+		orgName = user.Organization.Name
+	}
+
+	c.JSON(http.StatusOK, UserResponse{
+		ID:               user.ID,
+		Email:            user.Email,
+		Name:             user.Name,
+		Role:             user.Role,
+		OrganizationID:   user.OrganizationID,
+		OrganizationName: orgName,
+	})
+}
+
+// ChangePassword changes the current user's password
+func (h *AuthHandler) ChangePassword(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	var req ChangePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := h.userRepo.FindByID(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	// Verify current password
+	if !user.CheckPassword(req.CurrentPassword) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Current password is incorrect"})
+		return
+	}
+
+	// Hash and set new password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
+	user.Password = string(hashedPassword)
+
+	if err := h.userRepo.Update(user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
+}
+
+// GetOrganization returns the current user's organization details
+func (h *AuthHandler) GetOrganization(c *gin.Context) {
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	org, err := h.orgRepo.FindByID(orgID.(uint))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":        org.ID,
+		"name":      org.Name,
+		"slug":      org.Slug,
+		"createdAt": org.CreatedAt,
+	})
 }
 
 // Helper function to set auth cookies

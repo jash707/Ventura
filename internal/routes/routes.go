@@ -36,6 +36,13 @@ func registerAuthRoutes(r *gin.Engine, c *di.Container) {
 		auth.POST("/refresh", c.AuthHandler.Refresh)
 		auth.POST("/logout", c.AuthHandler.Logout)
 		auth.GET("/me", middleware.AuthMiddleware(), c.AuthHandler.Me)
+
+		// Profile management (protected)
+		auth.PUT("/profile", middleware.AuthMiddleware(), c.AuthHandler.UpdateProfile)
+		auth.PUT("/password", middleware.AuthMiddleware(), c.AuthHandler.ChangePassword)
+		auth.GET("/organization", middleware.AuthMiddleware(), c.AuthHandler.GetOrganization)
+		auth.POST("/invites", middleware.AuthMiddleware(), c.AuthHandler.CreateInviteCode)
+		auth.GET("/invites", middleware.AuthMiddleware(), c.AuthHandler.GetInviteCodes)
 	}
 }
 

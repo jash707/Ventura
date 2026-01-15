@@ -838,3 +838,154 @@ export async function removeTeamMember(
     throw new Error(error.error || "Failed to remove team member");
   }
 }
+
+// ============================================
+// Profile API Functions
+// ============================================
+
+const AUTH_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+export interface UpdateProfileData {
+  name: string;
+}
+
+export interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface Organization {
+  id: number;
+  name: string;
+  slug: string;
+  createdAt: string;
+}
+
+export interface InviteCode {
+  id: number;
+  code: string;
+  organizationId: number;
+  createdById: number;
+  usedById?: number;
+  expiresAt: string;
+  createdAt: string;
+  createdBy?: { name: string; email: string };
+}
+
+export async function updateProfile(
+  data: UpdateProfileData
+): Promise<{
+  id: number;
+  email: string;
+  name: string;
+  role: string;
+  organizationId: number;
+  organizationName?: string;
+}> {
+  const response = await fetch(`${AUTH_BASE_URL}/auth/profile`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to update profile");
+  }
+
+  return response.json();
+}
+
+export async function changePassword(data: ChangePasswordData): Promise<void> {
+  const response = await fetch(`${AUTH_BASE_URL}/auth/password`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to change password");
+  }
+}
+
+export async function fetchOrganization(): Promise<Organization> {
+  const response = await fetch(`${AUTH_BASE_URL}/auth/organization`, {
+    credentials: "include",
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to fetch organization");
+  }
+
+  return response.json();
+}
+
+export async function createInviteCode(): Promise<{
+  code: string;
+  expiresAt: string;
+}> {
+  const response = await fetch(`${AUTH_BASE_URL}/auth/invites`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to create invite code");
+  }
+
+  return response.json();
+}
+
+export async function fetchInviteCodes(): Promise<InviteCode[]> {
+  const response = await fetch(`${AUTH_BASE_URL}/auth/invites`, {
+    credentials: "include",
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to fetch invite codes");
+  }
+
+  return response.json();
+}
