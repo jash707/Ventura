@@ -1,9 +1,13 @@
 package handler
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
+	"time"
 	"ventura/internal/auth"
 	"ventura/internal/models"
 	"ventura/internal/repository"
@@ -13,17 +17,20 @@ import (
 
 type AuthHandler struct {
 	userRepo *repository.UserRepository
+	orgRepo  *repository.OrganizationRepository
 }
 
-func NewAuthHandler(userRepo *repository.UserRepository) *AuthHandler {
-	return &AuthHandler{userRepo: userRepo}
+func NewAuthHandler(userRepo *repository.UserRepository, orgRepo *repository.OrganizationRepository) *AuthHandler {
+	return &AuthHandler{userRepo: userRepo, orgRepo: orgRepo}
 }
 
 // RegisterRequest represents the registration request body
 type RegisterRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=8"`
-	Name     string `json:"name" binding:"required"`
+	Email            string `json:"email" binding:"required,email"`
+	Password         string `json:"password" binding:"required,min=8"`
+	Name             string `json:"name" binding:"required"`
+	OrganizationName string `json:"organizationName"` // Optional: create new org
+	InviteCode       string `json:"inviteCode"`       // Optional: join existing org
 }
 
 // LoginRequest represents the login request body
@@ -41,10 +48,39 @@ type AuthResponse struct {
 
 // UserResponse represents a user in responses (without password)
 type UserResponse struct {
-	ID    uint            `json:"id"`
-	Email string          `json:"email"`
-	Name  string          `json:"name"`
-	Role  models.UserRole `json:"role"`
+	ID               uint            `json:"id"`
+	Email            string          `json:"email"`
+	Name             string          `json:"name"`
+	Role             models.UserRole `json:"role"`
+	OrganizationID   uint            `json:"organizationId"`
+	OrganizationName string          `json:"organizationName,omitempty"`
+}
+
+// generateSlug creates a URL-friendly slug from a name
+func generateSlug(name string) string {
+	// Convert to lowercase
+	slug := strings.ToLower(name)
+	// Replace spaces with hyphens
+	slug = strings.ReplaceAll(slug, " ", "-")
+	// Remove non-alphanumeric characters except hyphens
+	reg := regexp.MustCompile("[^a-z0-9-]+")
+	slug = reg.ReplaceAllString(slug, "")
+	// Remove consecutive hyphens
+	reg = regexp.MustCompile("-+")
+	slug = reg.ReplaceAllString(slug, "-")
+	// Trim hyphens from ends
+	slug = strings.Trim(slug, "-")
+	// Add random suffix to ensure uniqueness
+	randomBytes := make([]byte, 4)
+	rand.Read(randomBytes)
+	return slug + "-" + hex.EncodeToString(randomBytes)
+}
+
+// generateInviteCode creates a random invite code
+func generateInviteCode() string {
+	randomBytes := make([]byte, 16)
+	rand.Read(randomBytes)
+	return hex.EncodeToString(randomBytes)
 }
 
 // Register creates a new user account
@@ -62,17 +98,78 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	// Validate: must either provide organization name OR invite code
+	if req.OrganizationName == "" && req.InviteCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Either organizationName or inviteCode is required"})
+		return
+	}
+
+	var organizationID uint
+	var organizationName string
+
+	if req.InviteCode != "" {
+		// Join existing organization via invite code
+		invite, err := h.orgRepo.GetInviteCodeByCode(req.InviteCode)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid invite code"})
+			return
+		}
+
+		// Check if invite is expired
+		if time.Now().After(invite.ExpiresAt) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invite code has expired"})
+			return
+		}
+
+		// Check if invite is already used
+		if invite.UsedByID != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invite code has already been used"})
+			return
+		}
+
+		organizationID = invite.OrganizationID
+		organizationName = invite.Organization.Name
+	} else {
+		// Create new organization
+		org := &models.Organization{
+			Name: req.OrganizationName,
+			Slug: generateSlug(req.OrganizationName),
+		}
+
+		if err := h.orgRepo.Create(org); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create organization"})
+			return
+		}
+
+		organizationID = org.ID
+		organizationName = org.Name
+	}
+
 	// Create user (password will be hashed by BeforeCreate hook)
 	user := &models.User{
-		Email:    strings.ToLower(req.Email),
-		Password: req.Password,
-		Name:     req.Name,
-		Role:     models.RoleViewer, // Default role
+		OrganizationID: organizationID,
+		Email:          strings.ToLower(req.Email),
+		Password:       req.Password,
+		Name:           req.Name,
+		Role:           models.RoleAdmin, // First user in org is admin
+	}
+
+	// If joining via invite, make them a viewer by default
+	if req.InviteCode != "" {
+		user.Role = models.RoleViewer
 	}
 
 	if err := h.userRepo.Create(user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
+	}
+
+	// Mark invite code as used if applicable
+	if req.InviteCode != "" {
+		invite, _ := h.orgRepo.GetInviteCodeByCode(req.InviteCode)
+		if invite != nil {
+			h.orgRepo.MarkInviteCodeUsed(invite.ID, user.ID)
+		}
 	}
 
 	// Generate tokens
@@ -93,10 +190,12 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, AuthResponse{
 		User: UserResponse{
-			ID:    user.ID,
-			Email: user.Email,
-			Name:  user.Name,
-			Role:  user.Role,
+			ID:               user.ID,
+			Email:            user.Email,
+			Name:             user.Name,
+			Role:             user.Role,
+			OrganizationID:   organizationID,
+			OrganizationName: organizationName,
 		},
 	})
 }
@@ -109,8 +208,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Find user by email
-	user, err := h.userRepo.FindByEmail(strings.ToLower(req.Email))
+	// Find user by email with organization preloaded
+	user, err := h.userRepo.FindByEmailWithOrganization(strings.ToLower(req.Email))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
@@ -138,12 +237,19 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// Set httpOnly cookies
 	setAuthCookies(c, accessToken, refreshToken)
 
+	orgName := ""
+	if user.Organization != nil {
+		orgName = user.Organization.Name
+	}
+
 	c.JSON(http.StatusOK, AuthResponse{
 		User: UserResponse{
-			ID:    user.ID,
-			Email: user.Email,
-			Name:  user.Name,
-			Role:  user.Role,
+			ID:               user.ID,
+			Email:            user.Email,
+			Name:             user.Name,
+			Role:             user.Role,
+			OrganizationID:   user.OrganizationID,
+			OrganizationName: orgName,
 		},
 	})
 }
@@ -193,17 +299,24 @@ func (h *AuthHandler) Me(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userRepo.FindByID(userID.(uint))
+	user, err := h.userRepo.FindByIDWithOrganization(userID.(uint))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
+	orgName := ""
+	if user.Organization != nil {
+		orgName = user.Organization.Name
+	}
+
 	c.JSON(http.StatusOK, UserResponse{
-		ID:    user.ID,
-		Email: user.Email,
-		Name:  user.Name,
-		Role:  user.Role,
+		ID:               user.ID,
+		Email:            user.Email,
+		Name:             user.Name,
+		Role:             user.Role,
+		OrganizationID:   user.OrganizationID,
+		OrganizationName: orgName,
 	})
 }
 
@@ -223,6 +336,56 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	c.SetCookie("refresh_token", "", -1, "/", "", secure, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+}
+
+// CreateInviteCode creates a new invite code for the current user's organization
+func (h *AuthHandler) CreateInviteCode(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	// Create invite code that expires in 7 days
+	invite := &models.InviteCode{
+		OrganizationID: orgID.(uint),
+		Code:           generateInviteCode(),
+		CreatedByID:    userID.(uint),
+		ExpiresAt:      time.Now().AddDate(0, 0, 7),
+	}
+
+	if err := h.orgRepo.CreateInviteCode(invite); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create invite code"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"code":      invite.Code,
+		"expiresAt": invite.ExpiresAt,
+	})
+}
+
+// GetInviteCodes returns all invite codes for the current user's organization
+func (h *AuthHandler) GetInviteCodes(c *gin.Context) {
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	invites, err := h.orgRepo.GetInviteCodesByOrganization(orgID.(uint))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get invite codes"})
+		return
+	}
+
+	c.JSON(http.StatusOK, invites)
 }
 
 // Helper function to set auth cookies

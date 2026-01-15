@@ -55,3 +55,30 @@ func (r *UserRepository) GetAll() ([]models.User, error) {
 	err := r.db.Find(&users).Error
 	return users, err
 }
+
+// GetAllByOrganization returns all users in an organization
+func (r *UserRepository) GetAllByOrganization(orgID uint) ([]models.User, error) {
+	var users []models.User
+	err := r.db.Where("organization_id = ?", orgID).Find(&users).Error
+	return users, err
+}
+
+// FindByEmailWithOrganization finds a user by email and preloads organization
+func (r *UserRepository) FindByEmailWithOrganization(email string) (*models.User, error) {
+	var user models.User
+	err := r.db.Preload("Organization").Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// FindByIDWithOrganization finds a user by ID and preloads organization
+func (r *UserRepository) FindByIDWithOrganization(id uint) (*models.User, error) {
+	var user models.User
+	err := r.db.Preload("Organization").First(&user, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}

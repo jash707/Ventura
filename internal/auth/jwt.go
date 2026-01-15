@@ -19,18 +19,20 @@ var (
 
 // Claims represents the JWT claims
 type Claims struct {
-	UserID uint            `json:"user_id"`
-	Email  string          `json:"email"`
-	Role   models.UserRole `json:"role"`
+	UserID         uint            `json:"user_id"`
+	OrganizationID uint            `json:"organization_id"`
+	Email          string          `json:"email"`
+	Role           models.UserRole `json:"role"`
 	jwt.RegisteredClaims
 }
 
 // GenerateAccessToken creates a new access token for a user
 func GenerateAccessToken(user *models.User) (string, error) {
 	claims := Claims{
-		UserID: user.ID,
-		Email:  user.Email,
-		Role:   user.Role,
+		UserID:         user.ID,
+		OrganizationID: user.OrganizationID,
+		Email:          user.Email,
+		Role:           user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(AccessTokenExpiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -47,9 +49,10 @@ func GenerateAccessToken(user *models.User) (string, error) {
 // GenerateRefreshToken creates a new refresh token for a user
 func GenerateRefreshToken(user *models.User) (string, error) {
 	claims := Claims{
-		UserID: user.ID,
-		Email:  user.Email,
-		Role:   user.Role,
+		UserID:         user.ID,
+		OrganizationID: user.OrganizationID,
+		Email:          user.Email,
+		Role:           user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(RefreshTokenExpiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -93,9 +96,10 @@ func RefreshAccessToken(refreshTokenString string) (string, error) {
 
 	// Create a new access token with the same user info
 	user := &models.User{
-		ID:    claims.UserID,
-		Email: claims.Email,
-		Role:  claims.Role,
+		ID:             claims.UserID,
+		OrganizationID: claims.OrganizationID,
+		Email:          claims.Email,
+		Role:           claims.Role,
 	}
 
 	return GenerateAccessToken(user)

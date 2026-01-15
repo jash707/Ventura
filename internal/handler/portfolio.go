@@ -17,9 +17,24 @@ func NewPortfolioHandler(portfolioRepo *repository.PortfolioRepository) *Portfol
 	return &PortfolioHandler{portfolioRepo: portfolioRepo}
 }
 
-// GetCompanies returns all portfolio companies
+// getOrganizationID extracts organization ID from context
+func getOrganizationID(c *gin.Context) (uint, bool) {
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		return 0, false
+	}
+	return orgID.(uint), true
+}
+
+// GetCompanies returns all portfolio companies for the user's organization
 func (h *PortfolioHandler) GetCompanies(c *gin.Context) {
-	companies, err := h.portfolioRepo.GetAll()
+	orgID, ok := getOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	companies, err := h.portfolioRepo.GetAllByOrganization(orgID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -35,11 +50,20 @@ func (h *PortfolioHandler) GetCompanies(c *gin.Context) {
 
 // CreateCompany creates a new portfolio company
 func (h *PortfolioHandler) CreateCompany(c *gin.Context) {
+	orgID, ok := getOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
 	var company models.PortfolioCompany
 	if err := c.ShouldBindJSON(&company); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Set organization ID from context
+	company.OrganizationID = orgID
 
 	if err := h.portfolioRepo.Create(&company); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -51,6 +75,12 @@ func (h *PortfolioHandler) CreateCompany(c *gin.Context) {
 
 // GetCompany returns a single portfolio company by ID
 func (h *PortfolioHandler) GetCompany(c *gin.Context) {
+	orgID, ok := getOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
@@ -58,7 +88,7 @@ func (h *PortfolioHandler) GetCompany(c *gin.Context) {
 		return
 	}
 
-	company, err := h.portfolioRepo.GetByID(uint(id))
+	company, err := h.portfolioRepo.GetByIDAndOrganization(uint(id), orgID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Company not found"})
 		return
@@ -72,6 +102,12 @@ func (h *PortfolioHandler) GetCompany(c *gin.Context) {
 
 // UpdateCompany updates an existing portfolio company
 func (h *PortfolioHandler) UpdateCompany(c *gin.Context) {
+	orgID, ok := getOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
@@ -79,8 +115,8 @@ func (h *PortfolioHandler) UpdateCompany(c *gin.Context) {
 		return
 	}
 
-	// Get existing company
-	existing, err := h.portfolioRepo.GetByID(uint(id))
+	// Get existing company (verifies ownership)
+	existing, err := h.portfolioRepo.GetByIDAndOrganization(uint(id), orgID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Company not found"})
 		return
@@ -93,7 +129,7 @@ func (h *PortfolioHandler) UpdateCompany(c *gin.Context) {
 		return
 	}
 
-	// Update fields
+	// Update fields (preserve organization ID)
 	existing.Name = updates.Name
 	existing.Sector = updates.Sector
 	existing.AmountInvested = updates.AmountInvested
@@ -115,6 +151,12 @@ func (h *PortfolioHandler) UpdateCompany(c *gin.Context) {
 
 // DeleteCompany soft deletes a portfolio company
 func (h *PortfolioHandler) DeleteCompany(c *gin.Context) {
+	orgID, ok := getOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
@@ -122,14 +164,14 @@ func (h *PortfolioHandler) DeleteCompany(c *gin.Context) {
 		return
 	}
 
-	// Verify company exists
-	_, err = h.portfolioRepo.GetByID(uint(id))
+	// Verify company exists and belongs to organization
+	_, err = h.portfolioRepo.GetByIDAndOrganization(uint(id), orgID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Company not found"})
 		return
 	}
 
-	if err := h.portfolioRepo.Delete(uint(id)); err != nil {
+	if err := h.portfolioRepo.DeleteByIDAndOrganization(uint(id), orgID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -139,6 +181,12 @@ func (h *PortfolioHandler) DeleteCompany(c *gin.Context) {
 
 // ToggleNotifications toggles the updates notifications for a company
 func (h *PortfolioHandler) ToggleNotifications(c *gin.Context) {
+	orgID, ok := getOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
@@ -146,8 +194,8 @@ func (h *PortfolioHandler) ToggleNotifications(c *gin.Context) {
 		return
 	}
 
-	// Get existing company
-	company, err := h.portfolioRepo.GetByID(uint(id))
+	// Get existing company (verifies ownership)
+	company, err := h.portfolioRepo.GetByIDAndOrganization(uint(id), orgID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Company not found"})
 		return

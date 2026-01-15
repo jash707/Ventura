@@ -94,6 +94,8 @@ export interface User {
   email: string;
   name: string;
   role: "admin" | "viewer";
+  organizationId: number;
+  organizationName?: string;
 }
 
 export interface AuthResponse {

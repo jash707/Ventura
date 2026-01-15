@@ -15,13 +15,17 @@ const (
 )
 
 type User struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	Email     string    `gorm:"uniqueIndex;not null" json:"email"`
-	Password  string    `gorm:"not null" json:"-"` // Never send password in JSON
-	Name      string    `gorm:"not null" json:"name"`
-	Role      UserRole  `gorm:"type:varchar(20);default:'viewer'" json:"role"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID             uint      `gorm:"primaryKey" json:"id"`
+	OrganizationID uint      `gorm:"not null;index" json:"organizationId"`
+	Email          string    `gorm:"uniqueIndex;not null" json:"email"`
+	Password       string    `gorm:"not null" json:"-"` // Never send password in JSON
+	Name           string    `gorm:"not null" json:"name"`
+	Role           UserRole  `gorm:"type:varchar(20);default:'viewer'" json:"role"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
+
+	// Relationships
+	Organization *Organization `gorm:"foreignKey:OrganizationID" json:"organization,omitempty"`
 }
 
 // BeforeCreate hook to hash password before saving

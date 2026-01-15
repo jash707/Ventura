@@ -28,6 +28,7 @@ type Container struct {
 func NewContainer(db *gorm.DB) *Container {
 	// Repositories
 	userRepo := repository.NewUserRepository(db)
+	orgRepo := repository.NewOrganizationRepository(db)
 	investmentRepo := repository.NewInvestmentRepository(db)
 	portfolioRepo := repository.NewPortfolioRepository(db)
 	dealRepo := repository.NewDealRepository(db)
@@ -42,7 +43,7 @@ func NewContainer(db *gorm.DB) *Container {
 
 	// Handlers
 	return &Container{
-		AuthHandler:          handler.NewAuthHandler(userRepo),
+		AuthHandler:          handler.NewAuthHandler(userRepo, orgRepo),
 		InvestmentHandler:    handler.NewInvestmentHandler(investmentService),
 		DashboardHandler:     handler.NewDashboardHandler(portfolioRepo, analyticsService),
 		DealHandler:          handler.NewDealHandler(dealRepo),

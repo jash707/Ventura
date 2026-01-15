@@ -9,6 +9,7 @@ import (
 
 type PortfolioCompany struct {
 	ID               uint            `gorm:"primaryKey" json:"id"`
+	OrganizationID   uint            `gorm:"not null;index" json:"organizationId"`
 	Name             string          `gorm:"not null" json:"name"`
 	Sector           string          `gorm:"not null" json:"sector"` // SaaS, Fintech, AI, BioTech
 	AmountInvested   decimal.Decimal `gorm:"type:decimal(20,2);not null" json:"amountInvested"`

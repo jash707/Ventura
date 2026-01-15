@@ -11,6 +11,8 @@ export interface RegisterRequest {
   email: string;
   password: string;
   name: string;
+  organizationName?: string; // Create new org
+  inviteCode?: string; // Join existing org
 }
 
 // Register a new user

@@ -22,7 +22,13 @@ func NewDashboardHandler(portfolioRepo *repository.PortfolioRepository, analytic
 
 // GetDashboard returns all dashboard metrics in one call
 func (h *DashboardHandler) GetDashboard(c *gin.Context) {
-	companies, err := h.portfolioRepo.GetAll()
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	companies, err := h.portfolioRepo.GetAllByOrganization(orgID.(uint))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -54,7 +60,13 @@ func (h *DashboardHandler) GetDashboard(c *gin.Context) {
 
 // GetAUM returns Assets Under Management metrics
 func (h *DashboardHandler) GetAUM(c *gin.Context) {
-	companies, err := h.portfolioRepo.GetAll()
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	companies, err := h.portfolioRepo.GetAllByOrganization(orgID.(uint))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -71,7 +83,13 @@ func (h *DashboardHandler) GetAUM(c *gin.Context) {
 
 // GetPerformance returns performance metrics (IRR, MOIC)
 func (h *DashboardHandler) GetPerformance(c *gin.Context) {
-	companies, err := h.portfolioRepo.GetAll()
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	companies, err := h.portfolioRepo.GetAllByOrganization(orgID.(uint))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -90,7 +108,13 @@ func (h *DashboardHandler) GetPerformance(c *gin.Context) {
 
 // GetSectors returns sector allocation
 func (h *DashboardHandler) GetSectors(c *gin.Context) {
-	companies, err := h.portfolioRepo.GetAll()
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	companies, err := h.portfolioRepo.GetAllByOrganization(orgID.(uint))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -103,7 +127,13 @@ func (h *DashboardHandler) GetSectors(c *gin.Context) {
 
 // GetHealth returns portfolio health breakdown
 func (h *DashboardHandler) GetHealth(c *gin.Context) {
-	companies, err := h.portfolioRepo.GetAll()
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	companies, err := h.portfolioRepo.GetAllByOrganization(orgID.(uint))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -120,7 +150,13 @@ func (h *DashboardHandler) GetHealth(c *gin.Context) {
 
 // GetDashboardHistory returns historical metrics for charts
 func (h *DashboardHandler) GetDashboardHistory(c *gin.Context) {
-	companies, err := h.portfolioRepo.GetAll()
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	companies, err := h.portfolioRepo.GetAllByOrganization(orgID.(uint))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -144,7 +180,13 @@ func (h *DashboardHandler) GetDashboardHistory(c *gin.Context) {
 
 // GetMissingUpdates returns companies that haven't submitted updates for last month
 func (h *DashboardHandler) GetMissingUpdates(c *gin.Context) {
-	missingUpdates, err := h.portfolioRepo.GetCompaniesWithMissingUpdates()
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	missingUpdates, err := h.portfolioRepo.GetCompaniesWithMissingUpdatesByOrganization(orgID.(uint))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

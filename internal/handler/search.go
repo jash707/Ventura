@@ -43,6 +43,12 @@ type SearchResponse struct {
 
 // GlobalSearch handles GET /api/search?q={query}
 func (h *SearchHandler) GlobalSearch(c *gin.Context) {
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
 	query := strings.TrimSpace(c.Query("q"))
 	if query == "" {
 		c.JSON(http.StatusOK, SearchResponse{
@@ -62,8 +68,8 @@ func (h *SearchHandler) GlobalSearch(c *gin.Context) {
 		Pages:     getStaticPages(queryLower),
 	}
 
-	// Search companies
-	companies, err := h.portfolioRepo.GetAll()
+	// Search companies within organization
+	companies, err := h.portfolioRepo.GetAllByOrganization(orgID.(uint))
 	if err == nil {
 		for _, company := range companies {
 			if strings.Contains(strings.ToLower(company.Name), queryLower) ||
@@ -79,8 +85,8 @@ func (h *SearchHandler) GlobalSearch(c *gin.Context) {
 		}
 	}
 
-	// Search deals
-	deals, err := h.dealRepo.GetAll()
+	// Search deals within organization
+	deals, err := h.dealRepo.GetAllByOrganization(orgID.(uint))
 	if err == nil {
 		for _, deal := range deals {
 			if strings.Contains(strings.ToLower(deal.CompanyName), queryLower) ||
@@ -96,24 +102,21 @@ func (h *SearchHandler) GlobalSearch(c *gin.Context) {
 		}
 	}
 
-	// Search users (admin only - check role from context)
-	userID, exists := c.Get("userID")
-	if exists {
-		currentUser, err := h.userRepo.FindByID(userID.(uint))
-		if err == nil && currentUser.Role == "admin" {
-			users, err := h.userRepo.GetAll()
-			if err == nil {
-				for _, user := range users {
-					if strings.Contains(strings.ToLower(user.Name), queryLower) ||
-						strings.Contains(strings.ToLower(user.Email), queryLower) {
-						response.Users = append(response.Users, SearchResult{
-							ID:          user.ID,
-							Type:        "user",
-							Name:        user.Name,
-							Description: user.Email + " • " + string(user.Role),
-							URL:         "/admin",
-						})
-					}
+	// Search users within organization (admin only - check role from context)
+	userRole, roleExists := c.Get("user_role")
+	if roleExists && userRole == "admin" {
+		users, err := h.userRepo.GetAllByOrganization(orgID.(uint))
+		if err == nil {
+			for _, user := range users {
+				if strings.Contains(strings.ToLower(user.Name), queryLower) ||
+					strings.Contains(strings.ToLower(user.Email), queryLower) {
+					response.Users = append(response.Users, SearchResult{
+						ID:          user.ID,
+						Type:        "user",
+						Name:        user.Name,
+						Description: user.Email + " • " + string(user.Role),
+						URL:         "/admin",
+					})
 				}
 			}
 		}

@@ -35,6 +35,8 @@ func Connect() *gorm.DB {
 // runMigrations runs all database migrations
 func runMigrations(db *gorm.DB) {
 	db.AutoMigrate(
+		&models.Organization{},
+		&models.InviteCode{},
 		&models.User{},
 		&models.Investment{},
 		&models.Metrics{},

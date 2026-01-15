@@ -29,6 +29,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// Attach user info to context
 		c.Set("user_id", claims.UserID)
+		c.Set("organization_id", claims.OrganizationID)
 		c.Set("user_email", claims.Email)
 		c.Set("user_role", claims.Role)
 
@@ -44,6 +45,7 @@ func OptionalAuthMiddleware() gin.HandlerFunc {
 			claims, err := auth.ValidateToken(tokenString)
 			if err == nil {
 				c.Set("user_id", claims.UserID)
+				c.Set("organization_id", claims.OrganizationID)
 				c.Set("user_email", claims.Email)
 				c.Set("user_role", claims.Role)
 			}

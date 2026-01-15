@@ -18,10 +18,11 @@ const (
 )
 
 type Deal struct {
-	ID          uint      `gorm:"primaryKey"`
-	CompanyName string    `gorm:"not null"`
-	Sector      string    `gorm:"not null"`
-	Stage       DealStage `gorm:"type:varchar(50);not null;default:'incoming'"`
+	ID             uint      `gorm:"primaryKey"`
+	OrganizationID uint      `gorm:"not null;index"`
+	CompanyName    string    `gorm:"not null"`
+	Sector         string    `gorm:"not null"`
+	Stage          DealStage `gorm:"type:varchar(50);not null;default:'incoming'"`
 
 	// Deal Details
 	RequestedAmount decimal.Decimal `gorm:"type:decimal(20,2)"`
