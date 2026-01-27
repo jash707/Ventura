@@ -13,7 +13,7 @@ interface AuthContextType {
     password: string,
     name: string,
     organizationName?: string,
-    inviteCode?: string
+    inviteCode?: string,
   ) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const currentUser = await authApi.getCurrentUser();
         setUser(currentUser);
-      } catch (error) {
+      } catch {
         // User is not authenticated
         setUser(null);
       } finally {
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     name: string,
     organizationName?: string,
-    inviteCode?: string
+    inviteCode?: string,
   ) => {
     const response = await authApi.register({
       email,
