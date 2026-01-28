@@ -10,13 +10,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { PageLayout } from "@/components/ui/page-layout";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
-
-type TabType = "users" | "audit";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Plus, Users, Activity } from "lucide-react";
 
 export default function AdminPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabType>("users");
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -50,12 +49,14 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => router.push("/")}
-                className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                className="gap-2 pl-0 hover:bg-transparent dark:hover:bg-transparent"
               >
-                ← Back to Dashboard
-              </button>
+                <ArrowLeft className="h-4 w-4" />
+                Back to Dashboard
+              </Button>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white transition-colors">
                 Team Management
               </h1>
@@ -67,14 +68,7 @@ export default function AdminPage() {
                 onClick={() => setShowInviteModal(true)}
                 className="gap-2"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
-                </svg>
+                <Plus className="h-4 w-4" />
                 Invite User
               </Button>
             </div>
@@ -84,58 +78,26 @@ export default function AdminPage() {
 
       {/* Tab Navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg w-fit border border-slate-200 dark:border-slate-700 transition-colors">
-          <button
-            onClick={() => setActiveTab("users")}
-            className={`px-6 py-2.5 rounded-md font-medium transition-all ${
-              activeTab === "users"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60"
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-              </svg>
+        <Tabs defaultValue="users" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+            <TabsTrigger value="users" className="gap-2">
+              <Users className="h-4 w-4" />
               Users
-            </span>
-          </button>
-          <button
-            onClick={() => setActiveTab("audit")}
-            className={`px-6 py-2.5 rounded-md font-medium transition-all ${
-              activeTab === "audit"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60"
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                  clipRule="evenodd"
-                />
-              </svg>
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="gap-2">
+              <Activity className="h-4 w-4" />
               Activity Log
-            </span>
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        <div className="mt-6">
-          {activeTab === "users" && <UserList key={refreshKey} />}
-          {activeTab === "audit" && <AuditLogView />}
-        </div>
+            </TabsTrigger>
+          </TabsList>
+          <div className="mt-6">
+            <TabsContent value="users">
+              <UserList key={refreshKey} />
+            </TabsContent>
+            <TabsContent value="audit">
+              <AuditLogView />
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
 
       {/* Invite Modal */}
