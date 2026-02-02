@@ -108,7 +108,7 @@ export async function fetchDashboardHistory(): Promise<DashboardHistoryData> {
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch dashboard history: ${response.statusText}`
+      `Failed to fetch dashboard history: ${response.statusText}`,
     );
   }
 
@@ -129,7 +129,7 @@ export async function fetchPortfolioCompanies(): Promise<PortfolioCompany[]> {
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch portfolio companies: ${response.statusText}`
+      `Failed to fetch portfolio companies: ${response.statusText}`,
     );
   }
 
@@ -141,7 +141,7 @@ export async function fetchCompanyById(id: string): Promise<PortfolioCompany> {
     `${API_BASE_URL}/api/portfolio/companies/${id}`,
     {
       credentials: "include",
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -163,7 +163,7 @@ export async function fetchCompanyById(id: string): Promise<PortfolioCompany> {
 }
 
 export async function createCompany(
-  data: CreateCompanyData
+  data: CreateCompanyData,
 ): Promise<PortfolioCompany> {
   const response = await fetch(`${API_BASE_URL}/api/portfolio/companies`, {
     method: "POST",
@@ -191,7 +191,7 @@ export async function createCompany(
 
 export async function updateCompany(
   id: number,
-  data: UpdateCompanyData
+  data: UpdateCompanyData,
 ): Promise<PortfolioCompany> {
   const response = await fetch(
     `${API_BASE_URL}/api/portfolio/companies/${id}`,
@@ -202,7 +202,7 @@ export async function updateCompany(
       },
       credentials: "include",
       body: JSON.stringify(data),
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -230,7 +230,7 @@ export async function deleteCompany(id: number): Promise<void> {
     {
       method: "DELETE",
       credentials: "include",
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -267,6 +267,9 @@ interface BackendDeal {
   FounderName: string;
   FounderEmail: string;
   Notes: string;
+  LossReason?: string;
+  ArchivedAt?: string;
+  ConvertedCompanyID?: number;
   CreatedAt: string;
   UpdatedAt: string;
 }
@@ -289,13 +292,22 @@ function transformDeal(backendDeal: BackendDeal): Deal {
     founderName: backendDeal.FounderName,
     founderEmail: backendDeal.FounderEmail,
     notes: backendDeal.Notes,
+    lossReason: backendDeal.LossReason as Deal["lossReason"],
+    archivedAt: backendDeal.ArchivedAt,
+    convertedCompanyId: backendDeal.ConvertedCompanyID,
     createdAt: backendDeal.CreatedAt,
     updatedAt: backendDeal.UpdatedAt,
   };
 }
 
-export async function fetchDeals(): Promise<Deal[]> {
-  const response = await fetch(`${API_BASE_URL}/api/deals`, {
+export async function fetchDeals(archived?: boolean): Promise<Deal[]> {
+  const params = new URLSearchParams();
+  if (archived !== undefined) {
+    params.append("archived", String(archived));
+  }
+  const url = `${API_BASE_URL}/api/deals${params.toString() ? "?" + params.toString() : ""}`;
+
+  const response = await fetch(url, {
     credentials: "include",
   });
 
@@ -316,7 +328,7 @@ export async function fetchDeals(): Promise<Deal[]> {
 
 export async function updateDealStage(
   id: number,
-  stage: DealStage
+  stage: DealStage,
 ): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/api/deals/${id}/stage`, {
     method: "PATCH",
@@ -339,16 +351,82 @@ export async function updateDealStage(
   }
 }
 
+export interface CloseDealData {
+  convertToPortfolio: boolean;
+  amountInvested?: number;
+  cashRemaining?: number;
+  monthlyBurnRate?: number;
+  monthlyRevenue?: number;
+}
+
+export async function closeDeal(
+  id: number,
+  data: CloseDealData,
+): Promise<{ message: string; companyId?: number }> {
+  const response = await fetch(`${API_BASE_URL}/api/deals/${id}/close`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to close deal");
+  }
+
+  return response.json();
+}
+
+import { LossReason } from "./types";
+
+export async function loseDeal(
+  id: number,
+  reason: LossReason,
+): Promise<{ message: string }> {
+  const response = await fetch(`${API_BASE_URL}/api/deals/${id}/lose`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ reason }),
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to lose deal");
+  }
+
+  return response.json();
+}
+
 // Founder API functions
 
 export async function fetchFoundersByCompany(
-  companyId: number
+  companyId: number,
 ): Promise<Founder[]> {
   const response = await fetch(
     `${API_BASE_URL}/api/companies/${companyId}/founders`,
     {
       credentials: "include",
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -367,7 +445,7 @@ export async function fetchFoundersByCompany(
 
 export async function createFounder(
   companyId: number,
-  data: CreateFounderData
+  data: CreateFounderData,
 ): Promise<Founder> {
   const response = await fetch(
     `${API_BASE_URL}/api/companies/${companyId}/founders`,
@@ -378,7 +456,7 @@ export async function createFounder(
       },
       credentials: "include",
       body: JSON.stringify(data),
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -398,7 +476,7 @@ export async function createFounder(
 
 export async function updateFounder(
   id: number,
-  data: CreateFounderData
+  data: CreateFounderData,
 ): Promise<Founder> {
   const response = await fetch(`${API_BASE_URL}/api/founders/${id}`, {
     method: "PUT",
@@ -446,13 +524,13 @@ export async function deleteFounder(id: number): Promise<void> {
 // Monthly Update API functions
 
 export async function fetchMonthlyUpdatesByCompany(
-  companyId: number
+  companyId: number,
 ): Promise<MonthlyUpdate[]> {
   const response = await fetch(
     `${API_BASE_URL}/api/companies/${companyId}/updates`,
     {
       credentials: "include",
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -471,7 +549,7 @@ export async function fetchMonthlyUpdatesByCompany(
 
 export async function createMonthlyUpdate(
   companyId: number,
-  data: CreateMonthlyUpdateData
+  data: CreateMonthlyUpdateData,
 ): Promise<MonthlyUpdate> {
   const response = await fetch(
     `${API_BASE_URL}/api/companies/${companyId}/updates`,
@@ -482,7 +560,7 @@ export async function createMonthlyUpdate(
       },
       credentials: "include",
       body: JSON.stringify(data),
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -502,7 +580,7 @@ export async function createMonthlyUpdate(
 
 export async function updateMonthlyUpdate(
   id: number,
-  data: CreateMonthlyUpdateData
+  data: CreateMonthlyUpdateData,
 ): Promise<MonthlyUpdate> {
   const response = await fetch(`${API_BASE_URL}/api/monthly-updates/${id}`, {
     method: "PUT",
@@ -554,7 +632,7 @@ export async function fetchMissingUpdates(): Promise<MissingUpdateInfo[]> {
     `${API_BASE_URL}/api/dashboard/missing-updates`,
     {
       credentials: "include",
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -574,7 +652,7 @@ export async function fetchMissingUpdates(): Promise<MissingUpdateInfo[]> {
 
 export async function toggleCompanyNotifications(
   companyId: number,
-  enabled: boolean
+  enabled: boolean,
 ): Promise<{ updatesNotificationsEnabled: boolean }> {
   const response = await fetch(
     `${API_BASE_URL}/api/portfolio/companies/${companyId}/notifications`,
@@ -583,7 +661,7 @@ export async function toggleCompanyNotifications(
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ enabled }),
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -630,7 +708,7 @@ export async function fetchUsers(): Promise<UserWithDetails[]> {
 
 export async function updateUser(
   id: number,
-  data: UpdateUserData
+  data: UpdateUserData,
 ): Promise<UserWithDetails> {
   const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
     method: "PUT",
@@ -682,7 +760,7 @@ export async function deleteUser(id: number): Promise<void> {
 }
 
 export async function inviteUser(
-  data: InviteUserData
+  data: InviteUserData,
 ): Promise<{ user: UserWithDetails; tempPassword: string }> {
   const response = await fetch(`${API_BASE_URL}/api/admin/users/invite`, {
     method: "POST",
@@ -717,7 +795,7 @@ export async function inviteUser(
 export async function fetchAuditLogs(
   page = 1,
   limit = 50,
-  filters?: { userId?: number; entity?: string; action?: string }
+  filters?: { userId?: number; entity?: string; action?: string },
 ): Promise<AuditLogResponse> {
   const params = new URLSearchParams({
     page: page.toString(),
@@ -732,7 +810,7 @@ export async function fetchAuditLogs(
     `${API_BASE_URL}/api/admin/audit-logs?${params}`,
     {
       credentials: "include",
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -758,13 +836,13 @@ export async function fetchAuditLogs(
 // ============================================
 
 export async function fetchCompanyTeam(
-  companyId: number
+  companyId: number,
 ): Promise<TeamMember[]> {
   const response = await fetch(
     `${API_BASE_URL}/api/companies/${companyId}/team`,
     {
       credentials: "include",
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -783,7 +861,7 @@ export async function fetchCompanyTeam(
 
 export async function addTeamMember(
   companyId: number,
-  data: AddTeamMemberData
+  data: AddTeamMemberData,
 ): Promise<TeamMember> {
   const response = await fetch(
     `${API_BASE_URL}/api/companies/${companyId}/team`,
@@ -792,7 +870,7 @@ export async function addTeamMember(
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify(data),
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -816,14 +894,14 @@ export async function addTeamMember(
 
 export async function removeTeamMember(
   companyId: number,
-  userId: number
+  userId: number,
 ): Promise<void> {
   const response = await fetch(
     `${API_BASE_URL}/api/companies/${companyId}/team/${userId}`,
     {
       method: "DELETE",
       credentials: "include",
-    }
+    },
   );
 
   if (response.status === 401) {
@@ -873,9 +951,7 @@ export interface InviteCode {
   createdBy?: { name: string; email: string };
 }
 
-export async function updateProfile(
-  data: UpdateProfileData
-): Promise<{
+export async function updateProfile(data: UpdateProfileData): Promise<{
   id: number;
   email: string;
   name: string;

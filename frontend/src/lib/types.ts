@@ -110,6 +110,14 @@ export type DealStage =
   | "closed"
   | "lost";
 
+export type LossReason =
+  | "passed"
+  | "valuation_too_high"
+  | "competitor_won"
+  | "founder_declined"
+  | "deal_fell_through"
+  | "other";
+
 export interface Deal {
   id: number;
   companyName: string;
@@ -126,6 +134,10 @@ export interface Deal {
   founderName: string;
   founderEmail: string;
   notes: string;
+  // Archive fields
+  lossReason?: LossReason;
+  archivedAt?: string;
+  convertedCompanyId?: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -103,6 +103,8 @@ func registerDealRoutes(api *gin.RouterGroup, c *di.Container) {
 		deals.GET("", c.DealHandler.GetDeals)
 		deals.POST("", c.DealHandler.CreateDeal)
 		deals.PATCH("/:id/stage", c.DealHandler.UpdateDealStage)
+		deals.PATCH("/:id/close", c.DealHandler.CloseDeal)
+		deals.PATCH("/:id/lose", c.DealHandler.LoseDeal)
 	}
 }
 

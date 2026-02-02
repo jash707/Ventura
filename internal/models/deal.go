@@ -17,6 +17,16 @@ const (
 	StageLost         DealStage = "lost"
 )
 
+// LossReason constants for lost deals
+const (
+	LossReasonPassed      = "passed"
+	LossReasonValuation   = "valuation_too_high"
+	LossReasonCompetitor  = "competitor_won"
+	LossReasonFounder     = "founder_declined"
+	LossReasonFellThrough = "deal_fell_through"
+	LossReasonOther       = "other"
+)
+
 type Deal struct {
 	ID             uint      `gorm:"primaryKey"`
 	OrganizationID uint      `gorm:"not null;index"`
@@ -39,6 +49,11 @@ type Deal struct {
 	// Contact
 	FounderName  string
 	FounderEmail string
+
+	// Archive/Outcome fields
+	LossReason         string     `gorm:"type:varchar(255)"` // Reason for lost deals
+	ArchivedAt         *time.Time `gorm:"index"`             // When deal was archived (null = active)
+	ConvertedCompanyID *uint      // Foreign key to created portfolio company
 
 	// Metadata
 	Notes     string `gorm:"type:text"`

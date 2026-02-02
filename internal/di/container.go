@@ -46,7 +46,7 @@ func NewContainer(db *gorm.DB) *Container {
 		AuthHandler:          handler.NewAuthHandler(userRepo, orgRepo),
 		InvestmentHandler:    handler.NewInvestmentHandler(investmentService),
 		DashboardHandler:     handler.NewDashboardHandler(portfolioRepo, analyticsService),
-		DealHandler:          handler.NewDealHandler(dealRepo),
+		DealHandler:          handler.NewDealHandler(dealRepo, portfolioRepo),
 		PortfolioHandler:     handler.NewPortfolioHandler(portfolioRepo),
 		FounderHandler:       handler.NewFounderHandler(founderRepo, portfolioRepo),
 		MonthlyUpdateHandler: handler.NewMonthlyUpdateHandler(monthlyUpdateRepo, portfolioRepo),
