@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   fetchCompanyById,
@@ -33,6 +33,7 @@ import {
   Bell,
   BellOff,
 } from "lucide-react";
+import { useAuthenticatedEffect } from "@/hooks/useAuthenticatedQuery";
 
 export default function CompanyDetailPage() {
   const params = useParams();
@@ -75,7 +76,7 @@ export default function CompanyDetailPage() {
       setError(null);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to load company details"
+        err instanceof Error ? err.message : "Failed to load company details",
       );
       console.error("Company detail error:", err);
     } finally {
@@ -92,7 +93,7 @@ export default function CompanyDetailPage() {
     }
   }, [companyId]);
 
-  useEffect(() => {
+  useAuthenticatedEffect(() => {
     loadCompany();
   }, [loadCompany]);
 
@@ -119,7 +120,7 @@ export default function CompanyDetailPage() {
     } catch (err) {
       showToast(
         err instanceof Error ? err.message : "Failed to delete company",
-        "error"
+        "error",
       );
     } finally {
       setDeleteLoading(false);
@@ -263,7 +264,7 @@ export default function CompanyDetailPage() {
                             company.updatesNotificationsEnabled === false;
                           await toggleCompanyNotifications(
                             company.id,
-                            newValue
+                            newValue,
                           );
                           setCompany({
                             ...company,
@@ -273,7 +274,7 @@ export default function CompanyDetailPage() {
                             newValue
                               ? "Notifications enabled"
                               : "Notifications disabled",
-                            "success"
+                            "success",
                           );
                         } catch {
                           showToast("Failed to toggle notifications", "error");
@@ -410,8 +411,8 @@ export default function CompanyDetailPage() {
                             Math.max(
                               0,
                               company.monthlyBurnRate -
-                                (company.monthlyRevenue || 0)
-                            )
+                                (company.monthlyRevenue || 0),
+                            ),
                           )}
                         </p>
                       </div>
@@ -437,7 +438,7 @@ export default function CompanyDetailPage() {
                               ? Math.floor(
                                   company.cashRemaining /
                                     (company.monthlyBurnRate -
-                                      company.monthlyRevenue)
+                                      company.monthlyRevenue),
                                 )
                               : "∞"}{" "}
                             months

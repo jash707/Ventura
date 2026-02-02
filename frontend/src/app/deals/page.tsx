@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { fetchDeals, updateDealStage } from "@/lib/api";
 import { Deal, DealStage } from "@/lib/types";
 import { KanbanBoard } from "@/components/deals/kanban-board";
@@ -9,6 +9,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { LayoutGrid, Plus } from "lucide-react";
+import { useAuthenticatedEffect } from "@/hooks/useAuthenticatedQuery";
 
 export default function DealsPage() {
   const [deals, setDeals] = useState<Deal[]>([]);
@@ -16,7 +17,7 @@ export default function DealsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
+  useAuthenticatedEffect(() => {
     async function loadDeals() {
       try {
         setLoading(true);

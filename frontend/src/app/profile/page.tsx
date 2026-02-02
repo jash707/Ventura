@@ -15,6 +15,7 @@ import {
   InviteCode,
 } from "@/lib/api";
 import { User, Building2, Key, Copy, Check, Plus, Clock } from "lucide-react";
+import { useAuthenticatedEffect } from "@/hooks/useAuthenticatedQuery";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -44,7 +45,7 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  useEffect(() => {
+  useAuthenticatedEffect(() => {
     async function loadData() {
       try {
         const [org, codes] = await Promise.all([

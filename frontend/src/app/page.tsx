@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AUMCard } from "@/components/dashboard/aum-card";
 import { PerformanceMetricsCard } from "@/components/dashboard/performance-metrics";
 import { SectorAllocationCard } from "@/components/dashboard/sector-allocation";
@@ -21,6 +21,7 @@ import { CurrencySelector } from "@/components/CurrencySelector";
 import { Footer } from "@/components/Footer";
 import { CommandPalette, useCommandPalette } from "@/components/CommandPalette";
 import { Search } from "lucide-react";
+import { useAuthenticatedEffect } from "@/hooks/useAuthenticatedQuery";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -35,7 +36,7 @@ export default function DashboardPage() {
     close: closeSearch,
   } = useCommandPalette();
 
-  useEffect(() => {
+  useAuthenticatedEffect(() => {
     async function loadDashboard() {
       try {
         setLoading(true);

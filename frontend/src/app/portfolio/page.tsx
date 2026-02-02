@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   fetchPortfolioCompanies,
   createCompany,
@@ -15,6 +15,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { Plus, Building2 } from "lucide-react";
+import { useAuthenticatedEffect } from "@/hooks/useAuthenticatedQuery";
 
 export default function PortfolioPage() {
   const [companies, setCompanies] = useState<PortfolioCompany[]>([]);
@@ -62,7 +63,7 @@ export default function PortfolioPage() {
     }
   }, []);
 
-  useEffect(() => {
+  useAuthenticatedEffect(() => {
     loadCompanies();
   }, [loadCompanies]);
 
