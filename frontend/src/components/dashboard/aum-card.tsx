@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { TrendingUp, DollarSign, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface AUMCardProps {
@@ -17,7 +17,7 @@ export function AUMCard({
 }: AUMCardProps) {
   const returnPercentage = ((unrealizedGains / totalDeployed) * 100).toFixed(1);
   const isPositive = unrealizedGains >= 0;
-  const { formatCurrency } = useCurrency();
+  const { formatCurrency, currencySymbol } = useCurrency();
 
   return (
     <Card className="p-6 card-base">
@@ -25,7 +25,9 @@ export function AUMCard({
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 transition-colors">
           Total AUM
         </h3>
-        <DollarSign className="h-5 w-5 text-emerald-500 dark:text-emerald-400 transition-colors" />
+        <span className="h-8 w-8 flex items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 font-bold text-lg transition-colors">
+          {currencySymbol}
+        </span>
       </div>
 
       <div className="space-y-4">

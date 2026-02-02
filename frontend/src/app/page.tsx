@@ -15,9 +15,7 @@ import {
   DashboardData,
   DashboardHistoryData,
 } from "@/lib/api";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import { AppLayout } from "@/components/AppLayout";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Footer } from "@/components/Footer";
@@ -27,12 +25,10 @@ import { Search } from "lucide-react";
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [historyData, setHistoryData] = useState<DashboardHistoryData | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user, logout } = useAuth();
-  const router = useRouter();
   const {
     isOpen: isSearchOpen,
     open: openSearch,
@@ -52,7 +48,7 @@ export default function DashboardPage() {
         setError(null);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load dashboard"
+          err instanceof Error ? err.message : "Failed to load dashboard",
         );
         console.error("Dashboard error:", err);
       } finally {
@@ -63,214 +59,143 @@ export default function DashboardPage() {
     loadDashboard();
   }, []);
 
-  const handleLogout = async () => {
-    await logout();
-    router.push("/login");
-  };
-
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-linear-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors">
-        {/* Header */}
-        <div className="border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-colors">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white transition-colors">
-                  Ventura Capital
-                </h1>
-                <p className="text-slate-600 dark:text-slate-400 mt-1 transition-colors">
-                  Investment Dashboard
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={openSearch}
-                  className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg transition-colors text-sm border border-slate-200 dark:border-slate-700"
-                >
-                  <Search className="w-4 h-4" />
-                  <span className="hidden sm:inline">Search...</span>
-                  <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-[10px] font-mono">
-                    ⌘K
-                  </kbd>
-                </button>
-                <button
-                  onClick={() => router.push("/portfolio")}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium shadow-lg shadow-blue-500/20"
-                >
-                  View Portfolio
-                </button>
-                <button
-                  onClick={() => router.push("/deals")}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium shadow-lg shadow-purple-500/20"
-                >
-                  View Deals
-                </button>
-                {user?.role === "admin" && (
-                  <button
-                    onClick={() => router.push("/admin")}
-                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors text-sm font-medium shadow-lg shadow-amber-500/20 flex items-center gap-2"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    Admin Panel
-                  </button>
-                )}
-                <button
-                  onClick={() => router.push("/profile")}
-                  className="flex flex-col items-end text-right px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors group"
-                >
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                    {user?.name || user?.email}
-                  </p>
-                  {user?.organizationName && (
-                    <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                        />
-                      </svg>
-                      {user.organizationName}
-                    </span>
-                  )}
-                </button>
-                <CurrencySelector />
-                <ThemeToggle />
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors text-sm font-medium"
-                >
-                  Logout
-                </button>
-              </div>
+    <AppLayout>
+      {/* Header */}
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white transition-colors">
+                Investment Dashboard
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 mt-1 transition-colors">
+                Overview of your portfolio performance
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={openSearch}
+                className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg transition-colors text-sm border border-slate-200 dark:border-slate-700"
+              >
+                <Search className="w-4 h-4" />
+                <span className="hidden sm:inline">Search...</span>
+                <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-[10px] font-mono">
+                  ⌘K
+                </kbd>
+              </button>
+              <CurrencySelector />
+              <ThemeToggle />
             </div>
           </div>
         </div>
-
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {loading && (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-slate-600 dark:text-slate-400 text-lg transition-colors">
-                Loading dashboard...
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 transition-colors">
-              <p className="text-red-700 dark:text-red-400 transition-colors">
-                ⚠️ {error}
-              </p>
-              <p className="text-sm text-red-600 dark:text-slate-400 mt-2 transition-colors">
-                Make sure the backend is running on http://localhost:8080
-              </p>
-            </div>
-          )}
-
-          {data && !loading && (
-            <div className="space-y-8">
-              {/* Missing Updates Alert */}
-              <MissingUpdatesAlert />
-
-              {/* Top Row - Key Metrics */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* AUM Card - Spans 1 column */}
-                <div className="lg:col-span-1">
-                  <AUMCard
-                    totalDeployed={parseFloat(data.aum.totalDeployed)}
-                    currentValuation={parseFloat(data.aum.currentValuation)}
-                    unrealizedGains={parseFloat(data.aum.unrealizedGains)}
-                  />
-                </div>
-
-                {/* Performance Metrics - Spans 2 columns */}
-                <div className="lg:col-span-2">
-                  <PerformanceMetricsCard
-                    metrics={{
-                      irr: data.performance.irr,
-                      moic: parseFloat(data.performance.moic),
-                      totalDeployed: parseFloat(data.performance.totalDeployed),
-                      currentValue: parseFloat(data.performance.currentValue),
-                      distributions: data.performance.distributions,
-                    }}
-                  />
-                </div>
-
-                {/* Left Column - Sector Allocation + Investment Timeline */}
-                <div className="lg:col-span-1 space-y-6">
-                  <SectorAllocationCard
-                    sectors={(data.sectorAllocation || []).map((s) => ({
-                      sector: s.sector,
-                      value: parseFloat(s.value),
-                      percentage: s.percentage,
-                      color: getColorForSector(s.sector),
-                    }))}
-                  />
-                  {historyData && (
-                    <InvestmentTimeline
-                      data={historyData.investmentTimeline || []}
-                    />
-                  )}
-                </div>
-
-                {/* Portfolio Health - Spans 2 columns */}
-                <div className="lg:col-span-2">
-                  <PortfolioHealthCard
-                    green={data.portfolioHealth?.green || []}
-                    yellow={data.portfolioHealth?.yellow || []}
-                    red={data.portfolioHealth?.red || []}
-                  />
-                </div>
-              </div>
-
-              {/* Charts Section */}
-              {historyData && (
-                <>
-                  {/* Performance History - Full Width */}
-                  <div>
-                    <PerformanceHistoryChart
-                      data={historyData.portfolioHistory || []}
-                    />
-                  </div>
-
-                  {/* Sector Comparison - Full Width */}
-                  <div>
-                    <SectorComparisonChart
-                      data={historyData.sectorComparison || []}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <Footer />
-
-        {/* Command Palette */}
-        <CommandPalette isOpen={isSearchOpen} onClose={closeSearch} />
       </div>
-    </ProtectedRoute>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {loading && (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-slate-600 dark:text-slate-400 text-lg transition-colors">
+              Loading dashboard...
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 transition-colors">
+            <p className="text-red-700 dark:text-red-400 transition-colors">
+              ⚠️ {error}
+            </p>
+            <p className="text-sm text-red-600 dark:text-slate-400 mt-2 transition-colors">
+              Make sure the backend is running on http://localhost:8080
+            </p>
+          </div>
+        )}
+
+        {data && !loading && (
+          <div className="space-y-8">
+            {/* Missing Updates Alert */}
+            <MissingUpdatesAlert />
+
+            {/* Top Row - Key Metrics */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* AUM Card - Spans 1 column */}
+              <div className="lg:col-span-1">
+                <AUMCard
+                  totalDeployed={parseFloat(data.aum.totalDeployed)}
+                  currentValuation={parseFloat(data.aum.currentValuation)}
+                  unrealizedGains={parseFloat(data.aum.unrealizedGains)}
+                />
+              </div>
+
+              {/* Performance Metrics - Spans 2 columns */}
+              <div className="lg:col-span-2">
+                <PerformanceMetricsCard
+                  metrics={{
+                    irr: data.performance.irr,
+                    moic: parseFloat(data.performance.moic),
+                    totalDeployed: parseFloat(data.performance.totalDeployed),
+                    currentValue: parseFloat(data.performance.currentValue),
+                    distributions: data.performance.distributions,
+                  }}
+                />
+              </div>
+
+              {/* Left Column - Sector Allocation + Investment Timeline */}
+              <div className="lg:col-span-1 space-y-6">
+                <SectorAllocationCard
+                  sectors={(data.sectorAllocation || []).map((s) => ({
+                    sector: s.sector,
+                    value: parseFloat(s.value),
+                    percentage: s.percentage,
+                    color: getColorForSector(s.sector),
+                  }))}
+                />
+                {historyData && (
+                  <InvestmentTimeline
+                    data={historyData.investmentTimeline || []}
+                  />
+                )}
+              </div>
+
+              {/* Portfolio Health - Spans 2 columns */}
+              <div className="lg:col-span-2">
+                <PortfolioHealthCard
+                  green={data.portfolioHealth?.green || []}
+                  yellow={data.portfolioHealth?.yellow || []}
+                  red={data.portfolioHealth?.red || []}
+                />
+              </div>
+            </div>
+
+            {/* Charts Section */}
+            {historyData && (
+              <>
+                {/* Performance History - Full Width */}
+                <div>
+                  <PerformanceHistoryChart
+                    data={historyData.portfolioHistory || []}
+                  />
+                </div>
+
+                {/* Sector Comparison - Full Width */}
+                <div>
+                  <SectorComparisonChart
+                    data={historyData.sectorComparison || []}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <Footer />
+
+      {/* Command Palette */}
+      <CommandPalette isOpen={isSearchOpen} onClose={closeSearch} />
+    </AppLayout>
   );
 }
 

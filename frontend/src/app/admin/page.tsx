@@ -7,11 +7,11 @@ import { UserList } from "@/components/admin/user-list";
 import { AuditLogView } from "@/components/admin/audit-log";
 import { InviteModal } from "@/components/admin/invite-modal";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { PageLayout } from "@/components/ui/page-layout";
+import { AppLayout } from "@/components/AppLayout";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Users, Activity } from "lucide-react";
+import { Plus, Users, Activity, Settings } from "lucide-react";
 
 export default function AdminPage() {
   const { user, loading } = useAuth();
@@ -43,23 +43,21 @@ export default function AdminPage() {
   };
 
   return (
-    <PageLayout>
+    <AppLayout>
       {/* Header */}
       <header className="bg-white/50 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/")}
-                className="gap-2 pl-0 hover:bg-transparent dark:hover:bg-transparent"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Dashboard
-              </Button>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white transition-colors">
-                Team Management
-              </h1>
+            <div className="flex items-center gap-3">
+              <Settings className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white transition-colors">
+                  Team Management
+                </h1>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">
+                  Manage users and view activity
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <ThemeToggle />
@@ -107,6 +105,6 @@ export default function AdminPage() {
           onSuccess={handleInviteSuccess}
         />
       )}
-    </PageLayout>
+    </AppLayout>
   );
 }
