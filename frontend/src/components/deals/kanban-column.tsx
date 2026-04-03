@@ -14,6 +14,7 @@ interface KanbanColumnProps {
   stage: DealStage;
   deals: Deal[];
   count: number;
+  onDealUpdated?: (updatedDeal: Deal) => void;
 }
 
 export function KanbanColumn({
@@ -21,6 +22,7 @@ export function KanbanColumn({
   stage,
   deals,
   count,
+  onDealUpdated,
 }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({ id: stage });
 
@@ -52,7 +54,7 @@ export function KanbanColumn({
               No deals in this stage
             </div>
           ) : (
-            deals.map((deal) => <DealCard key={deal.id} deal={deal} />)
+            deals.map((deal) => <DealCard key={deal.id} deal={deal} onDealUpdated={onDealUpdated} />)
           )}
         </SortableContext>
       </div>

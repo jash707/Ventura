@@ -80,6 +80,7 @@ func registerDashboardRoutes(api *gin.RouterGroup, c *di.Container) {
 		dashboard.GET("/health", c.DashboardHandler.GetHealth)
 		dashboard.GET("/history", c.DashboardHandler.GetDashboardHistory)
 		dashboard.GET("/missing-updates", c.DashboardHandler.GetMissingUpdates)
+		dashboard.GET("/ai-insight", c.DashboardHandler.GetAIInsight)
 	}
 }
 
@@ -105,6 +106,7 @@ func registerDealRoutes(api *gin.RouterGroup, c *di.Container) {
 		deals.PATCH("/:id/stage", c.DealHandler.UpdateDealStage)
 		deals.PATCH("/:id/close", c.DealHandler.CloseDeal)
 		deals.PATCH("/:id/lose", c.DealHandler.LoseDeal)
+		deals.POST("/:id/ai-score", c.DealHandler.AIScoreDeal)
 	}
 }
 

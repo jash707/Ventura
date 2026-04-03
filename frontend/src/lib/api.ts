@@ -115,6 +115,27 @@ export async function fetchDashboardHistory(): Promise<DashboardHistoryData> {
   return response.json();
 }
 
+export async function fetchAIInsight(): Promise<{ insight: string }> {
+  const response = await fetch(`${API_BASE_URL}/api/dashboard/ai-insight`, {
+    credentials: "include",
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch AI insight: ${response.statusText}`,
+    );
+  }
+
+  return response.json();
+}
+
 export async function fetchPortfolioCompanies(): Promise<PortfolioCompany[]> {
   const response = await fetch(`${API_BASE_URL}/api/portfolio/companies`, {
     credentials: "include",
@@ -349,6 +370,31 @@ export async function updateDealStage(
   if (!response.ok) {
     throw new Error(`Failed to update deal stage: ${response.statusText}`);
   }
+}
+
+export async function aiScoreDeal(id: number): Promise<Deal> {
+  const response = await fetch(`${API_BASE_URL}/api/deals/${id}/ai-score`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    const errObj = await response.json().catch(() => null);
+    throw new Error(errObj?.error || `Failed to score deal: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return transformDeal(data);
 }
 
 export interface CloseDealData {

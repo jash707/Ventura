@@ -163,7 +163,7 @@ export function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm font-medium text-slate-900 dark:text-white">
-              © 2025 Ventura Capital
+              © 2026 Ventura Capital
             </p>
             <div className="flex items-center gap-6">
               <Link

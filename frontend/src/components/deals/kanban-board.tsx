@@ -18,6 +18,7 @@ import { DealCard } from "./deal-card";
 interface KanbanBoardProps {
   deals: Deal[];
   onDealStageChange: (dealId: number, newStage: DealStage) => Promise<void>;
+  onDealUpdated?: (updatedDeal: Deal) => void;
 }
 
 const STAGES: { id: DealStage; title: string }[] = [
@@ -29,7 +30,7 @@ const STAGES: { id: DealStage; title: string }[] = [
   { id: "lost", title: "Lost" },
 ];
 
-export function KanbanBoard({ deals, onDealStageChange }: KanbanBoardProps) {
+export function KanbanBoard({ deals, onDealStageChange, onDealUpdated }: KanbanBoardProps) {
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
   const [localDeals, setLocalDeals] = useState(deals);
 
@@ -131,6 +132,7 @@ export function KanbanBoard({ deals, onDealStageChange }: KanbanBoardProps) {
               stage={stage.id}
               deals={stageDeals}
               count={stageDeals.length}
+              onDealUpdated={onDealUpdated}
             />
           );
         })}
@@ -139,7 +141,7 @@ export function KanbanBoard({ deals, onDealStageChange }: KanbanBoardProps) {
       <DragOverlay>
         {activeDeal ? (
           <div className="rotate-3 scale-105">
-            <DealCard deal={activeDeal} />
+            <DealCard deal={activeDeal} onDealUpdated={onDealUpdated} />
           </div>
         ) : null}
       </DragOverlay>

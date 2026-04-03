@@ -9,6 +9,7 @@ import { PerformanceHistoryChart } from "@/components/dashboard/performance-hist
 import { SectorComparisonChart } from "@/components/dashboard/sector-comparison-chart";
 import { InvestmentTimeline } from "@/components/dashboard/investment-timeline";
 import MissingUpdatesAlert from "@/components/dashboard/missing-updates-alert";
+import { AIInsightCard } from "@/components/dashboard/ai-insight-card";
 import {
   fetchDashboardData,
   fetchDashboardHistory,
@@ -117,6 +118,9 @@ export default function DashboardPage() {
           <div className="space-y-8">
             {/* Missing Updates Alert */}
             <MissingUpdatesAlert />
+
+            {/* AI Portfolio Insights */}
+            <AIInsightCard />
 
             {/* Top Row - Key Metrics */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

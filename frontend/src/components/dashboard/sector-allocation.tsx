@@ -51,16 +51,16 @@ export function SectorAllocationCard({ sectors }: SectorAllocationProps) {
         Sector Allocation
       </h3>
 
-      <div className="flex items-center justify-between">
-        <div className="h-48 flex-1">
+      <div className="flex flex-col gap-6">
+        <div className="h-[250px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={sectors}
                 cx="50%"
                 cy="50%"
-                innerRadius={50}
-                outerRadius={80}
+                innerRadius={65}
+                outerRadius={95}
                 paddingAngle={2}
                 dataKey="value"
               >
@@ -73,18 +73,18 @@ export function SectorAllocationCard({ sectors }: SectorAllocationProps) {
           </ResponsiveContainer>
         </div>
 
-        <div className="flex-1 space-y-3">
+        <div className="w-full space-y-3">
           {sectors.map((sector, index) => (
             <div
               key={`${sector.sector}-${index}`}
               className="flex items-center justify-between"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: sector.color }}
                 />
-                <span className="text-sm text-card-foreground">
+                <span className="text-sm font-medium text-card-foreground">
                   {sector.sector}
                 </span>
               </div>
@@ -92,7 +92,7 @@ export function SectorAllocationCard({ sectors }: SectorAllocationProps) {
                 <p className="text-sm font-semibold text-card-foreground">
                   {(sector.percentage ?? 0).toFixed(1)}%
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {formatCurrency(sector.value)}
                 </p>
               </div>

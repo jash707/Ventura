@@ -40,13 +40,15 @@ func NewContainer(db *gorm.DB) *Container {
 	// Services
 	investmentService := service.NewInvestmentService(investmentRepo)
 	analyticsService := service.NewAnalyticsService()
+	aiDealScorerService := service.NewAIDealScorerService()
+	aiPortfolioInsightService := service.NewAIPortfolioInsightService()
 
 	// Handlers
 	return &Container{
 		AuthHandler:          handler.NewAuthHandler(userRepo, orgRepo),
 		InvestmentHandler:    handler.NewInvestmentHandler(investmentService),
-		DashboardHandler:     handler.NewDashboardHandler(portfolioRepo, analyticsService),
-		DealHandler:          handler.NewDealHandler(dealRepo, portfolioRepo),
+		DashboardHandler:     handler.NewDashboardHandler(portfolioRepo, analyticsService, aiPortfolioInsightService, monthlyUpdateRepo),
+		DealHandler:          handler.NewDealHandler(dealRepo, portfolioRepo, aiDealScorerService),
 		PortfolioHandler:     handler.NewPortfolioHandler(portfolioRepo),
 		FounderHandler:       handler.NewFounderHandler(founderRepo, portfolioRepo),
 		MonthlyUpdateHandler: handler.NewMonthlyUpdateHandler(monthlyUpdateRepo, portfolioRepo),

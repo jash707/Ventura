@@ -9,14 +9,23 @@ import (
 )
 
 type DashboardHandler struct {
-	portfolioRepo *repository.PortfolioRepository
-	analytics     *service.AnalyticsService
+	portfolioRepo    *repository.PortfolioRepository
+	analytics        *service.AnalyticsService
+	aiInsight        *service.AIPortfolioInsightService
+	monthlyUpdateRepo *repository.MonthlyUpdateRepository
 }
 
-func NewDashboardHandler(portfolioRepo *repository.PortfolioRepository, analytics *service.AnalyticsService) *DashboardHandler {
+func NewDashboardHandler(
+	portfolioRepo *repository.PortfolioRepository,
+	analytics *service.AnalyticsService,
+	aiInsight *service.AIPortfolioInsightService,
+	monthlyUpdateRepo *repository.MonthlyUpdateRepository,
+) *DashboardHandler {
 	return &DashboardHandler{
-		portfolioRepo: portfolioRepo,
-		analytics:     analytics,
+		portfolioRepo:     portfolioRepo,
+		analytics:         analytics,
+		aiInsight:         aiInsight,
+		monthlyUpdateRepo: monthlyUpdateRepo,
 	}
 }
 
@@ -193,4 +202,35 @@ func (h *DashboardHandler) GetMissingUpdates(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, missingUpdates)
+}
+
+// GetAIInsight returns an AI-generated summary of the portfolio
+func (h *DashboardHandler) GetAIInsight(c *gin.Context) {
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	companies, err := h.portfolioRepo.GetAllByOrganization(orgID.(uint))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	updates, err := h.monthlyUpdateRepo.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	insight, err := h.aiInsight.GeneratePortfolioInsight(companies, updates)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate AI insight: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"insight": insight,
+	})
 }

@@ -4,11 +4,12 @@ import { Deal } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Building2, Star } from "lucide-react";
+import { Building2, Star, Sparkles } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface DealCardProps {
   deal: Deal;
+  onDealUpdated?: (updatedDeal: Deal) => void;
 }
 
 export function DealCard({ deal }: DealCardProps) {
@@ -43,7 +44,7 @@ export function DealCard({ deal }: DealCardProps) {
       style={style}
       {...attributes}
       {...listeners}
-      className="card-base p-4 hover:shadow-md cursor-grab active:cursor-grabbing"
+      className={`card-base p-4 hover:shadow-md cursor-grab active:cursor-grabbing transition-shadow relative ${isDragging ? "shadow-lg scale-105" : ""}`}
     >
       {/* Company Name */}
       <div className="flex items-start gap-2 mb-3">
@@ -61,7 +62,7 @@ export function DealCard({ deal }: DealCardProps) {
         </div>
       </div>
 
-      {/*  Requested Amount */}
+      {/* Requested Amount */}
       <div className="flex items-center gap-2 mb-3 text-sm">
         <span className="font-medium text-slate-900 dark:text-white">
           {formatCurrency(deal.requestedAmount)}
@@ -74,12 +75,23 @@ export function DealCard({ deal }: DealCardProps) {
       {/* Total Score */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400">
-          <Star className="h-3 w-3" />
-          <span>Score</span>
+          {deal.totalScore > 0 ? (
+            <>
+              <Sparkles className="h-3 w-3 text-violet-500" />
+              <span className="text-violet-600 dark:text-violet-400 font-medium">AI Score</span>
+            </>
+          ) : (
+            <>
+              <Star className="h-3 w-3" />
+              <span>Score</span>
+            </>
+          )}
         </div>
-        <span className="text-sm font-bold text-slate-900 dark:text-white">
-          {deal.totalScore}/40
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-slate-900 dark:text-white">
+            {deal.totalScore}/40
+          </span>
+        </div>
       </div>
 
       {/* Score Breakdown */}

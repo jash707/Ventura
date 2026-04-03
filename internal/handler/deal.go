@@ -6,6 +6,7 @@ import (
 	"time"
 	"ventura/internal/models"
 	"ventura/internal/repository"
+	"ventura/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
@@ -14,10 +15,11 @@ import (
 type DealHandler struct {
 	dealRepo      *repository.DealRepository
 	portfolioRepo *repository.PortfolioRepository
+	aiDealScorer  *service.AIDealScorerService
 }
 
-func NewDealHandler(dealRepo *repository.DealRepository, portfolioRepo *repository.PortfolioRepository) *DealHandler {
-	return &DealHandler{dealRepo: dealRepo, portfolioRepo: portfolioRepo}
+func NewDealHandler(dealRepo *repository.DealRepository, portfolioRepo *repository.PortfolioRepository, aiDealScorer *service.AIDealScorerService) *DealHandler {
+	return &DealHandler{dealRepo: dealRepo, portfolioRepo: portfolioRepo, aiDealScorer: aiDealScorer}
 }
 
 // GetDeals returns all deals for the user's organization, optionally filtered by stage or archived status
@@ -254,4 +256,47 @@ func (h *DealHandler) LoseDeal(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Deal marked as lost and archived"})
+}
+
+// AIScoreDeal analyzes a deal using AI
+func (h *DealHandler) AIScoreDeal(c *gin.Context) {
+	orgID, exists := c.Get("organization_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Organization not found"})
+		return
+	}
+
+	idParam := c.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	deal, err := h.dealRepo.GetByIDAndOrganization(uint(id), orgID.(uint))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Deal not found"})
+		return
+	}
+
+	// Calculate and get AI score logic
+	result, err := h.aiDealScorer.ScoreDeal(c.Request.Context(), deal)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Save the scores and AI insight to the deal
+	deal.TeamScore = result.TeamScore
+	deal.ProductScore = result.ProductScore
+	deal.MarketScore = result.MarketScore
+	deal.TractionScore = result.TractionScore
+	deal.Notes = deal.Notes + "\n\n--- AI Analysis ---\nSummary: " + result.Summary + "\nStrengths: " + result.KeyStrengths + "\nRisks: " + result.KeyRisks
+	
+	if err := h.dealRepo.Update(deal); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save AI scores: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, deal)
 }

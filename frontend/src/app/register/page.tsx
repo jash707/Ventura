@@ -316,7 +316,7 @@ function RegisterForm() {
 
       {/* Footer */}
       <div className="mt-8 text-center text-slate-500 dark:text-slate-500 transition-colors text-sm">
-        <p>© 2025 Ventura Capital. All rights reserved.</p>
+        <p>© 2026 Ventura Capital. All rights reserved.</p>
       </div>
     </div>
   );

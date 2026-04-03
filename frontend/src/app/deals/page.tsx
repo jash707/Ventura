@@ -80,6 +80,12 @@ export default function DealsPage() {
     );
   };
 
+  const handleDealUpdated = (updatedDeal: Deal) => {
+    setDeals((prev) =>
+      prev.map((d) => (d.id === updatedDeal.id ? updatedDeal : d)),
+    );
+  };
+
   const handleDealCreated = (newDeal: Deal) => {
     setDeals((prev) => [newDeal, ...prev]);
   };
@@ -238,6 +244,7 @@ export default function DealsPage() {
             <KanbanBoard
               deals={deals}
               onDealStageChange={handleDealStageChange}
+              onDealUpdated={handleDealUpdated}
             />
 
             {/* Empty State */}
